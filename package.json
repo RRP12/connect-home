@@ -6,19 +6,26 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "devwithinspect": "NODE_OPTIONS='--inspect' next dev"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@heroicons/react": "^2.1.5",
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
     "@mui/styles": "^6.1.6",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.46.1",
+    "dropzone": "^6.0.0-beta.2",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.456.0",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
-    "react-dom": "19.0.0-rc-02c0e824-20241028"
+    "react-dom": "19.0.0-rc-02c0e824-20241028",
+    "react-dropzone": "^14.3.5",
+    "react-hook-form": "^7.53.2"
   },
   "devDependencies": {
     "eslint": "^8",

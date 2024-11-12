@@ -8,6 +8,10 @@ import Navbar from "../components/navbar";
 import LocationComponent from "../components/LocationComponent.js";
 import SerchBar from "../components/serchBar";
 import Link from "next/link";
+import PropertyCard from "../components/propertyDetailsCard/propertyDetailsCard";
+import FacebookPropertyPost from "../components/FacebookPropertyListing.js";
+import PropertyFilters from "../components/PropertyFilter";
+import ImageGallery from "../components/imaagewithmodalViewbeta";
 
 export default async function Home() {
   const supabase = createServerComponentClient({ cookies });
@@ -19,18 +23,18 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const { data: tweets } = await supabase.from("tweets").select("*");
+  const { data: properties } = await supabase.from("properties").select("*");
+  console.log("properties", properties);
 
   return (
     <>
-      <AuthButtonServer />
-      <LocationComponent />
-      <div>
-        <Head>
+      <Navbar />
+      {/* <AuthButtonServer />
+      <LocationComponent /> */}
+      <div style={{ display: "flex" }}>
+        {/* <Head>
           <title>Find Your Dream PG</title>
-        </Head>
-
-        <Navbar />
+        </Head> */}
 
         <Container maxWidth="lg" sx={{ mt: 10 }}>
           <Grid container spacing={2}>
@@ -69,11 +73,20 @@ export default async function Home() {
                 <SerchBar />
               </div>
             </Grid>
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               <img src="/pg-image.jpg" alt="PG Image" width="100%" />
-            </Grid>
+            </Grid> */}
           </Grid>
-          <Grid container spacing={2} sx={{ mt: 5 }}>
+
+          {/* {properties?.length > 0
+            ? properties.map((p) => <PropertyCard property={p} />)
+            : null} */}
+
+          {properties?.length > 0 &&
+            properties.map((p) => (
+              <FacebookPropertyPost key={p.title} property={p} />
+            ))}
+          {/* <Grid container spacing={2} sx={{ mt: 5 }}>
             <Grid item xs={12} md={4}>
               <Typography variant="h5" component="h5" gutterBottom>
                 Popular Locations
@@ -102,8 +115,12 @@ export default async function Home() {
                 "Found my dream PG with this platform!" - John Doe
               </blockquote>
             </Grid>
-          </Grid>
+          </Grid> */}
         </Container>
+
+        {/* <PropertyFilters /> */}
+
+        {/* <ImageGallery images={[img1, img2, img3]} /> */}
       </div>
 
       {/* <pre>{JSON.stringify(tweets)}</pre> */}
