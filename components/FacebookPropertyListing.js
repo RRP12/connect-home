@@ -83,7 +83,7 @@ const FacebookPropertyPost = ({ property }) => {
 
           <div className="mt-3 space-y-1 text-sm">
             <Typography sx={{ fontFamily: "Roboto" }} variant="h6">
-              {formattedPropertyData.title.toUpperCase()}
+              {formattedPropertyData?.title}
             </Typography>
             <p>🌟🎄 Festive season offers 🤝💫</p>
             <p>*SINGLE OCCUPANCY* #male</p>

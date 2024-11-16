@@ -7,7 +7,16 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Alert } from "@mui/material"; // Import MUI Alert
 
 import { Controller } from "react-hook-form";
-const BasicDetails = ({ handleSubmit, register, errors, reset, control }) => {
+import ImageUpload from "../imageUpload/imageupload";
+import UploadImagetest from "../../testCoomponets/Imageuploadtest";
+const BasicDetails = ({
+  handleSubmit,
+  register,
+  errors,
+  reset,
+  control,
+  onSubmit,
+}) => {
   const [location, setLocation] = useState({ latitude: null, longitude: null });
   const [status, setStatus] = useState("");
   const [errorMessage, setErrorMessage] = useState(""); // To display errors like duplicate key
@@ -15,41 +24,281 @@ const BasicDetails = ({ handleSubmit, register, errors, reset, control }) => {
   const supabase = createClientComponentClient({ cookies: Cookies.get() });
 
   // Handle form submission
-  const handleFormSubmit = async (data) => {
-    try {
-      // Insert data into the properties table
-      const { error } = await supabase.from("properties").insert([
-        {
-          title: data.propertyTitle,
-          location:
-            data.location || `${location.latitude}, ${location.longitude}`,
-          landmark: data.landmark,
-          pincode: data.pincode,
-          property_type: data.propertyType,
-        },
-      ]);
+  // const handleFormSubmit = async (data) => {
+  //   onSubmit(data);
+  //   try {
+  //     // Insert data into the properties table
+  //     const { error } = await supabase.from("properties").insert([
+  //       {
+  //         title: data.propertyTitle,
+  //         location:
+  //           data.location || `${location.latitude}, ${location.longitude}`,
+  //         landmark: data.landmark,
+  //         pincode: data.pincode,
+  //         property_type: data.propertyType,
+  //       },
+  //     ]);
 
-      if (error) {
-        // Check if the error is a duplicate key violation
-        if (error.code === "23505") {
-          setErrorMessage(
-            "The property title already exists. Please choose a different title."
-          );
+  //     if (error) {
+  //       // Check if the error is a duplicate key violation
+  //       if (error.code === "23505") {
+  //         setErrorMessage(
+  //           "The property title already exists. Please choose a different title."
+  //         );
+  //       } else {
+  //         setErrorMessage("An error occurred while submitting your form.");
+  //       }
+  //       throw error; // Stop further execution if error occurred
+  //     }
+
+  //     // Reset form and states if submission is successful
+  //     reset(); // Reset form fields
+  //     setLocation({ latitude: null, longitude: null });
+  //     setStatus("");
+  //     setErrorMessage(""); // Clear error message
+  //     alert("Property details added successfully!");
+  //     onSubmit();
+  //   } catch (error) {
+  //     console.error("Error inserting data:", error);
+  //   }
+  // };
+
+  // const handleFormSubmit = async (data) => {
+  //   // onSubmit(data);
+  //   // try {
+  //   //   // Check if there are any images in the form data
+  //   //   const imageUploadPromises = data.property_Images.map(async (image) => {
+  //   //     // Create a unique file name (you can use a timestamp or UUID)
+  //   //     const fileName = `${Date.now()}_${image.name}`;
+  //   //     const filePath = `property_Images/${fileName}`;
+
+  //   //     // console.log("filePath", filePath);
+
+  //   //     // Upload the image to Supabase Storage
+  //   //     const { data: uploadedData, error: uploadError } =
+  //   //       await supabase.storage
+  //   //         .from("property-images") // Assuming 'property_images' is your bucket name
+  //   //         .upload(filePath, image.file);
+
+  //   //     if (uploadError) {
+  //   //       throw new Error(`Error uploading image: ${uploadError.message}`);
+  //   //     }
+
+  //   //     // Get the public URL for the uploaded image
+  //   //     const publicUrl = supabase.storage
+  //   //       .from("property_images")
+  //   //       .getPublicUrl(filePath).publicURL;
+
+  //   //     return publicUrl;
+  //   //   });
+
+  //   //   // Wait for all image uploads to complete
+  //   //   const imageUrls = await Promise.all(imageUploadPromises);
+
+  //   //   // Insert data into the properties table
+  //   //   const { error } = await supabase.from("properties").insert([
+  //   //     {
+  //   //       title: data.propertyTitle,
+  //   //       location:
+  //   //         data.location || `${location.latitude}, ${location.longitude}`,
+  //   //       landmark: data.landmark,
+  //   //       pincode: data.pincode,
+  //   //       property_type: data.propertyType,
+  //   //       property_images: imageUrls, // Store the image URLs
+  //   //     },
+  //   //   ]);
+
+  //   //   if (error) {
+  //   //     // Handle errors
+  //   //     if (error.code === "23505") {
+  //   //       setErrorMessage(
+  //   //         "The property title already exists. Please choose a different title."
+  //   //       );
+  //   //     } else {
+  //   //       setErrorMessage(
+  //   //         "An error occurred while submitting your form. Please try again."
+  //   //       );
+  //   //     }
+  //   //     throw error;
+  //   //   }
+
+  //   //   // Reset form and states after successful submission
+  //   //   reset();
+  //   //   setLocation({ latitude: null, longitude: null });
+  //   //   setStatus("");
+  //   //   setErrorMessage("");
+
+  //   //   alert("Property details added successfully!");
+
+  //   //   // Trigger the onSubmit callback after successful submission
+  //   //   onSubmit(data);
+  //   // } catch (error) {
+  //   //   console.error("Error inserting data:", error);
+  //   //   setErrorMessage("An unexpected error occurred. Please try again later.");
+  //   // }
+  // };
+  const checkImageFiles = async (images) => {
+    if (!images || images.length === 0) {
+      console.log("No images found");
+    } else {
+      images.forEach((image, index) => {
+        if (!image || !image.file || !image.file.name) {
+          console.log(`Image at index ${index} is missing or invalid:`, image);
         } else {
-          setErrorMessage("An error occurred while submitting your form.");
+          console.log(`Image at index ${index} is valid:`, image.file.name);
         }
-        throw error; // Stop further execution if error occurred
+      });
+
+      const imageUploadPromises = images.map(async (image) => {
+        if (image.file) {
+          const fileName = `${Date.now()}_${image.file.name}`; // Generate unique file name
+          const filePath = `property-images/${fileName}`; // Correct file path format
+          console.log("filePath", filePath);
+
+          // Upload the image to Supabase Storage (bucket: 'property-images')
+          const { data: uploadedData, error: uploadError } =
+            await supabase.storage
+              .from("property-images") // Correct bucket name
+              .upload(filePath, image.file);
+
+          if (uploadError) {
+            console.log("Upload Error:", uploadError);
+            throw new Error(`Error uploading image: ${uploadError.message}`);
+          }
+
+          console.log("Uploaded Data:", uploadedData); // Check the upload data
+
+          // Use the correct `path` instead of `fullPath` for public URL
+          const { publicURL, error: urlError } = supabase.storage
+            .from("property-images")
+            .getPublicUrl(uploadedData.path); // Use uploadedData.path
+
+          if (urlError) {
+            console.log("URL Retrieval Error:", urlError);
+            throw new Error(`Error retrieving public URL: ${urlError.message}`);
+          }
+
+          console.log("Generated Public URL:", publicURL);
+          return publicURL; // Return the public URL for later use (e.g., storing it in the DB)
+        }
+
+        const publicUrl = supabase.storage
+          .from("property-images")
+          .getPublicUrl(uploadedData.path).publicURL;
+
+        console.log("publicUrl", publicUrl);
+      });
+
+      // Wait for all image uploads and public URLs
+      const imageUrls = await Promise.all(imageUploadPromises);
+      console.log("All image URLs:", imageUrls);
+      return imageUrls; // Return image URLs for further processing (e.g., saving in the database)
+    }
+  };
+
+  const handleFormSubmit = async (data) => {
+    // checkImageFiles(data.property_Images);
+
+    const imageUploadPromises = data.property_Images.map(async (image) => {
+      const fileName = `${Date.now()}_${image.file.name}`;
+      const filePath = `property-images/${fileName}`;
+
+      // Upload the image to Supabase storage
+      const { data: uploadedData, error: uploadError } = await supabase.storage
+        .from("property-images")
+        .upload(filePath, image.file);
+
+      if (uploadError) {
+        console.error("Error uploading file:", uploadError);
+        throw new Error("Error uploading file");
       }
 
-      // Reset form and states if submission is successful
-      reset(); // Reset form fields
-      setLocation({ latitude: null, longitude: null });
-      setStatus("");
-      setErrorMessage(""); // Clear error message
-      alert("Property details added successfully!");
-    } catch (error) {
-      console.error("Error inserting data:", error);
-    }
+      // Step 2: Get the public URL of the uploaded file
+      const publicUrl = supabase.storage
+        .from("property-images")
+        .getPublicUrl(uploadedData.path).publicURL;
+
+      console.log("Generated Public URL:", publicUrl);
+      return publicUrl;
+    });
+
+    // Wait for all image uploads to complete and get the URLs
+    const imageUrls = await Promise.all(imageUploadPromises);
+    console.log("All image URLs:", imageUrls);
+
+    // Step 3: Insert the image URLs into the `properties` table
+    const { error: insertError } = await supabase.from("properties").insert([
+      {
+        title: data.propertyTitle,
+        location:
+          data.location || `${location.latitude}, ${location.longitude}`,
+        landmark: data.landmark,
+        pincode: data.pincode,
+        property_type: data.propertyType,
+        images: imageUrls, // Store the URLs in the 'images' column
+      },
+    ]);
+
+    // try {
+    //   // Check if there are any images in the form data
+    //   const imageUploadPromises = data.property_Images.map(async (image) => {
+    //     // Generate a unique file name
+    //     const fileName = `${Date.now()}_${image.file.name}`;
+    //     const filePath = `property-images/${fileName}`; // Correct bucket name
+    //     console.log("filePath", filePath);
+    //     // Upload the image to Supabase Storage (bucket: 'property-images')
+    //     const { data: uploadedData, error: uploadError } =
+    //       await supabase.storage
+    //         .from("property-images") // Your correct bucket name: 'property-images'
+    //         .upload(filePath, image.file);
+    //     if (uploadError) {
+    //       throw new Error(`Error uploading image: ${uploadError.message}`);
+    //     }
+    //     // Get the public URL for the uploaded image
+    //     const publicUrl = supabase.storage
+    //       .from("property-images") // Correct bucket name
+    //       .getPublicUrl(filePath).publicURL;
+    //     return publicUrl;
+    //   });
+    //   // Wait for all image uploads to complete
+    //   const imageUrls = await Promise.all(imageUploadPromises);
+    //   // Insert data into the properties table, storing the image URLs as JSON
+    //   const { error } = await supabase.from("properties").insert([
+    //     {
+    //       title: data.propertyTitle,
+    //       location:
+    //         data.location || `${location.latitude}, ${location.longitude}`,
+    //       landmark: data.landmark,
+    //       pincode: data.pincode,
+    //       property_type: data.propertyType,
+    //       images: imageUrls, // Store the image URLs as a JSON array
+    //     },
+    //   ]);
+    //   if (error) {
+    //     // Handle errors (like a unique constraint violation for title)
+    //     if (error.code === "23505") {
+    //       setErrorMessage(
+    //         "The property title already exists. Please choose a different title."
+    //       );
+    //     } else {
+    //       setErrorMessage(
+    //         "An error occurred while submitting your form. Please try again."
+    //       );
+    //     }
+    //     throw error;
+    //   }
+    //   // Reset form and states after successful submission
+    //   reset();
+    //   setLocation({ latitude: null, longitude: null });
+    //   setStatus("");
+    //   setErrorMessage("");
+    //   alert("Property details added successfully!");
+    //   // Trigger the onSubmit callback after successful submission
+    //   onSubmit(data);
+    // } catch (error) {
+    //   console.error("Error inserting data:", error);
+    //   setErrorMessage("An unexpected error occurred. Please try again later.");
+    // }
   };
 
   // Geolocation logic
@@ -176,7 +425,8 @@ const BasicDetails = ({ handleSubmit, register, errors, reset, control }) => {
         </select>
         {errors.propertyType && <p>{errors.propertyType.message}</p>}
       </div>
-
+      <ImageUpload control={control} />
+      {/* <UploadImagetest /> */}
       <button type="submit">Submit</button>
     </form>
   );
