@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import img1 from "../assets/image1.jpg";
@@ -8,17 +7,21 @@ import img3 from "../assets/image3.jpg";
 import img4 from "../assets/img4.jpg";
 import Link from "next/link";
 import { Typography } from "@mui/material";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
-const images = [img4, img1, img2, img3];
+const images = [img4, img1, img2, img3, img4, img2];
 
-const FacebookPropertyPost = ({ property }) => {
+const PropertyCard = ({ property, title }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // const [locationData, setLocationData] = useState({}); // Changed to handle loading state
 
   const formattedPropertyData = {
-    propertyType: property.property_type,
-    title: property.title,
-    createdAt: new Date(property.created_at).toLocaleDateString(),
+    propertyType: property?.property_type,
+    title: property?.title,
+    createdAt: new Date(property?.created_at).toLocaleDateString(),
   };
 
   const openModal = (index) => {
@@ -60,6 +63,46 @@ const FacebookPropertyPost = ({ property }) => {
     };
   }, [isModalOpen]);
 
+  // async function getlocation(property) {
+  //   const apiKey = process.env.Location_key; // Correct API key access
+
+  //   let [longitude, latitude] = property?.location?.coordinates;
+
+  //   try {
+  //     const response = await fetch(
+  //       `https://us1.locationiq.com/v1/reverse?key=pk.1f9c41d0bd69b268097b057cd9345bfd&lat=${longitude}&lon=${latitude}&format=json&addressdetails=1`
+  //     );
+  //     const data = await response.json();
+  //     return data; // Return the fetched location data
+  //   } catch (error) {
+  //     console.error("Error fetching location:", error);
+  //     return null; // Return null in case of error
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (property) {
+  //       const data = await getlocation(property); // Fetch the location data
+  //       setLocationData(data); // Set the data in state
+  //     }
+  //   };
+
+  //   fetchData(); // Call the async function
+  // }, [property]);
+
+  const imageDetails = images.map((image) => {
+    let area = image.height * image.width; // Calculate the area
+    return {
+      src: image.src,
+      height: image.height,
+      width: image.width,
+      area: area,
+    };
+  });
+
+  let sortedImages = imageDetails?.sort((a, b) => b.area - a.area);
+
   return (
     <div className="max-w-xl bg-white rounded-lg shadow">
       <Link href={`/property/${property?.id}`}>
@@ -73,10 +116,10 @@ const FacebookPropertyPost = ({ property }) => {
               />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold">Ayesha Shaikh</h3>
-              <p className="text-xs text-gray-500">
-                {formattedPropertyData?.createdAt}
-              </p>
+              <h3 className="subpixel-antialiased indent-1 text-gray-500 text-lg font-extralight">
+                {title}
+              </h3>
+              <p className="text-xs text-gray-500">{property?.created_at}</p>
             </div>
             <button className="text-gray-400">...</button>
           </div>
@@ -90,51 +133,76 @@ const FacebookPropertyPost = ({ property }) => {
             <p className="text-blue-600">
               #LUXURIOUS #BEAUTIFUL #FULLYFURNISHED #BI... अधिक पढ़ें
             </p>
+
+            <div>
+              <h1 className="text-gray-500 text-sm">
+                <span className="font-bold">Price</span> {property?.price}
+              </h1>
+              <span className="text-gray-500 text-sm">Address</span>
+              {/* {locationData ? (
+                <p>{locationData?.display_name}</p>
+              ) : (
+                <p>Loading location...</p>
+              )} */}
+              <p className="grey-500">{property?.address}</p>
+            </div>
           </div>
         </div>
       </Link>
 
-      <div className="grid grid-cols-6 grid-rows-2 gap-1">
-        <div className="col-span-6 row-span-1 h-64 bg-gray-100">
-          <Image
-            src={img4}
-            alt="City skyline"
-            onClick={() => openModal(0)}
-            className="w-full h-full object-cover cursor-pointer"
-          />
-        </div>
-        <div className="col-span-2 h-32 bg-gray-100">
-          <Image
-            src={img1}
-            alt="Interior detail"
-            onClick={() => openModal(1)}
-            className="w-full h-full object-cover cursor-pointer"
-          />
-        </div>
-        <div className="col-span-2 h-32 bg-gray-100">
-          <Image
-            src={img2}
-            alt="Night view"
-            onClick={() => openModal(2)}
-            className="w-full h-full object-cover cursor-pointer"
-          />
-        </div>
-        <div className="col-span-2 h-32 relative bg-gray-100">
-          <Image
-            src={img3}
-            alt="Garden view"
-            onClick={() => openModal(3)}
-            className="w-full h-full object-cover cursor-pointer"
-          />
-          <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-sm">
-            2/29
+      <div className="border-l-8 grid grid-cols-6 gap-1">
+        {/* First Image (Full width) */}
+        {sortedImages?.length > 0 && (
+          <div className="col-span-6 row-span-1 h-64 bg-gray-100">
+            <Image
+              src={sortedImages[0].src} // First image
+              alt={sortedImages[0].alt || ""}
+              width={sortedImages[0].width}
+              height={sortedImages[0].height}
+              onClick={() => openModal(0)} // First image click
+              className="w-full h-full object-cover cursor-pointer"
+            />
           </div>
-        </div>
+        )}
+
+        {/* Next 2 Images (2nd to 3rd) */}
+        {sortedImages?.slice(1, 3).map((image, index) => (
+          <div key={index} className="col-span-2 h-32 bg-gray-100">
+            <Image
+              src={image.src}
+              alt={image.alt || ""}
+              width={image.width}
+              height={image.height}
+              onClick={() => openModal(index + 1)} // Adjust index for modal
+              className="w-full h-full object-cover cursor-pointer"
+            />
+          </div>
+        ))}
+
+        {/* 4th Image and Overlay if more than 4 images */}
+        {sortedImages?.length > 3 && (
+          <div className="col-span-2 h-32 relative bg-gray-100">
+            <Image
+              src={sortedImages[3].src} // 4th image
+              alt={sortedImages[3].alt || ""}
+              width={sortedImages[3].width}
+              height={sortedImages[3].height}
+              onClick={() => openModal(3)} // Open modal for the 4th image
+              className="w-full h-full object-cover cursor-pointer"
+            />
+            {sortedImages.length > 4 && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-xl font-bold">
+                +{sortedImages.length - 4} more
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
+      {/* Social Interactions Section */}
       <div className="p-2 border-t mt-1">
         <div className="grid grid-cols-4 gap-1">
-          {["लाइक", "टिप्पणी", "शेयर", "सामाजिक करें"].map((text) => (
+          {["like", "comment", "share", "review"].map((text) => (
             <button
               key={text}
               className="flex items-center justify-center gap-2 py-2 text-gray-600 hover:bg-gray-100 rounded"
@@ -144,36 +212,8 @@ const FacebookPropertyPost = ({ property }) => {
           ))}
         </div>
       </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <button
-            className="absolute top-4 right-4 text-white text-2xl"
-            onClick={closeModal}
-          >
-            ×
-          </button>
-          <button
-            className="absolute left-4 text-white text-2xl"
-            onClick={prevImage}
-          >
-            ‹
-          </button>
-          <Image
-            src={images[currentImageIndex]}
-            alt="Selected property image"
-            className="max-w-full max-h-full object-cover"
-          />
-          <button
-            className="absolute right-4 text-white text-2xl"
-            onClick={nextImage}
-          >
-            ›
-          </button>
-        </div>
-      )}
     </div>
   );
 };
 
-export default FacebookPropertyPost;
+export default PropertyCard;

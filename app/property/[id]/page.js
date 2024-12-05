@@ -11,7 +11,7 @@ export default async function PropertyPage({ params }) {
   if (error) {
     console.log("error", error);
   }
-  console.log("property", property);
+
 
   // You can fetch and display the property here based on the `id`
   return (

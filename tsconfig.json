@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "app/test/page.js", "app/ui/fonts.js", "app/dashboard/(overview)/page.js"  ],
   "exclude": [
     "node_modules"
   ]

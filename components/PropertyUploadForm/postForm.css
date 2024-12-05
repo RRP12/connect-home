@@ -1,0 +1,31 @@
+.Costuminput {
+  border: 1px solid rgb(223, 177, 172);
+  padding: 10px;
+}
+
+.CostumForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.Conatiner1 {
+  display: flex;
+  gap: 20px;
+}
+
+.Conatiner2 {
+  display: flex;
+  gap: 20px;
+}
+
+.Common-Container {
+  display: flex;
+  flex-direction: column;
+}

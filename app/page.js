@@ -2,19 +2,59 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import AuthButtonServer from "./auth-button-server";
 import { redirect } from "next/navigation";
-import { Container, Button, Typography, Grid } from "@mui/material";
-import Head from "next/head";
-import Navbar from "../components/navbar";
+// import { Box, Container, Grid } from "@mui/material";
+import { Container, Row, Col } from "react-bootstrap";
 import LocationComponent from "../components/LocationComponent.js";
-import SerchBar from "../components/serchBar";
-import Link from "next/link";
-import PropertyCard from "../components/propertyDetailsCard/propertyDetailsCard";
-import FacebookPropertyPost from "../components/FacebookPropertyListing.js";
 import PropertyFilters from "../components/PropertyFilter";
-import ImageGallery from "../components/imaagewithmodalViewbeta";
+import PropertyList from "../components/propertyList/PropertyList";
+// import SearchBox from "../components/searchbox/searchbox";
+// import PropertyList from "../components/propertyList/PropertyList";
+import { CiHome, CiBellOn, CiChat1, CiUser } from "react-icons/ci";
+import SearchBox from "../components/searchbox/searchbox";
+// import SerchBar from "../components/serchBar";
+import { lusitana } from "./ui/fonts";
+import clsx from "clsx";
+import { Suspense } from "react";
+import { TableRowSkeleton } from "./skeletons";
 
+import {
+  HarmCategory,
+  HarmBlockThreshold,
+  GoogleGenerativeAI,
+} from "@google/generative-ai";
 export default async function Home() {
+  const apiKey = "AIzaSyDlUn4zOqjv7b-c43oS2kVapN_spHJ6V_0";
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+  });
+
+  const generationConfig = {
+    temperature: 1,
+    topP: 0.95,
+    topK: 40,
+    maxOutputTokens: 8192,
+    responseMimeType: "text/plain",
+  };
+
+  async function run() {
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [],
+    });
+
+    const result = await chatSession.sendMessage(
+      "what is the capital of india"
+    );
+
+    console.log("result", result.response.text());
+  }
+
+  run();
+
   const supabase = createServerComponentClient({ cookies });
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -23,173 +63,62 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const { data: properties } = await supabase.from("properties").select("*");
-  console.log("properties", properties);
+  let user = await supabase.auth.getUser();
+  console.log("user", user.data.user.id);
+
+  // const { data: properties } = await supabase.from("properties").select("*");
 
   return (
-    <>
-      <Navbar />
-      {/* <AuthButtonServer />
-      <LocationComponent /> */}
-      <div style={{ display: "flex" }}>
-        {/* <Head>
-          <title>Find Your Dream PG</title>
-        </Head> */}
-
-        <Container maxWidth="lg" sx={{ mt: 10 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h2" component="h2" gutterBottom>
-                Find Your Dream PG
-              </Typography>
-              <Typography variant="h5" component="h5" gutterBottom>
-                Search, Connect, and Rent with Ease
-              </Typography>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <Button variant="contained" size="large">
-                  Find PG
-                </Button>
-
-                <Link href="/postproperty">
-                  <button
-                    style={{
-                      position: "fixed",
-                      bottom: "20px",
-                      right: "20px",
-                      padding: "15px 30px",
-                      backgroundColor: "#ff5722",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "50px",
-                      fontSize: "18px",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Post a Property
-                  </button>
-                </Link>
-
-                <SerchBar />
-              </div>
-            </Grid>
-            {/* <Grid item xs={12} md={6}>
-              <img src="/pg-image.jpg" alt="PG Image" width="100%" />
-            </Grid> */}
-          </Grid>
-
-          {/* {properties?.length > 0
-            ? properties.map((p) => <PropertyCard property={p} />)
-            : null} */}
-
-          {properties?.length > 0 &&
-            properties.map((p) => (
-              <FacebookPropertyPost key={p.title} property={p} />
-            ))}
-          {/* <Grid container spacing={2} sx={{ mt: 5 }}>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h5" component="h5" gutterBottom>
-                Popular Locations
-              </Typography>
-              <ul>
-                <li>Mumbai</li>
-                <li>Delhi</li>
-                <li>Bangalore</li>
-              </ul>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h5" component="h5" gutterBottom>
-                Types of PG
-              </Typography>
-              <ul>
-                <li>Shared Room</li>
-                <li>Private Room</li>
-                <li>Entire Flat</li>
-              </ul>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h5" component="h5" gutterBottom>
-                Testimonials
-              </Typography>
-              <blockquote>
-                "Found my dream PG with this platform!" - John Doe
-              </blockquote>
-            </Grid>
-          </Grid> */}
-        </Container>
-
-        {/* <PropertyFilters /> */}
-
-        {/* <ImageGallery images={[img1, img2, img3]} /> */}
-      </div>
-
-      {/* <pre>{JSON.stringify(tweets)}</pre> */}
-
-      {/* <ul>
-        {tweets.map((tweet) => (
-          <div key={tweet.title}>
-            <p>{tweet.title}</p>
-            <p>{tweet.user_id}</p>
+    <main className="flex min-h-screen flex-col p-6">
+      <AuthButtonServer />
+      <div className="h-full flex flex-col w-10/12 mx-auto">
+        <div className="flex flex-row justify-around  my-10 gap-4">
+          <div className="border border-sky-100 h-full">
+            <PropertyFilters />
           </div>
-        ))}
-      </ul> */}
-    </>
+          <div className=" flex-2 h-full ">
+            <div>
+              <Suspense fallback={<TableRowSkeleton />}>
+                <PropertyList />
+              </Suspense>
+            </div>
+          </div>
+          <div className=" h-full ">
+            <Aside />
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
 
-// Properties table
-// id (primary key)
-// title
-// description
-// price
-// location (city, state, country)
-// latitude
-// longitude
-// type (PG/rental flat)
-// amenities
-// images
-// user_id (foreign key referencing Users table)
+const Aside = () => {
+  const data = [
+    { name: "Explore", icon: CiHome, status: "pending" },
+    { name: "Notification", icon: CiBellOn, status: "pending" },
+    { name: "Messages", icon: CiChat1, status: "pending" },
+    { name: "Profile", icon: CiUser, status: "pending" },
+  ];
 
-// Sharing Types Table
-// id (primary key)
-// property_id (foreign key referencing Properties table)
-// sharing_type (single, double, triple, 4-sharing)
-// price
-// availability (yes/no)
-
-// CREATE TYPE property_type AS ENUM (
-//   'pg',
-//   'rental_flat',
-//   'shared_room',
-//   'private_room',
-//   'studio_apartment',
-//   '1bhk',
-//   '2bhk',
-//   '3bhk'
-// );
-
-// {
-//   "id": 1,
-//   "title": "Mumbai PG",
-//   "amenities": [
-//     {"id": 1, "name": "Wi-Fi"},
-//     {"id": 2, "name": "Laundry facilities"},
-//     {"id": 3, "name": "Gym"}
-//   ]
-// }
-
-// to configure
-// [
-//   {"id": 1, "name": "Wi-Fi"},
-//   {"id": 2, "name": "Laundry facilities"}
-// ]
-
-// {
-//   "id": 1,
-//   "title": "Mumbai PG",
-//   "images": [
-//     "image1.jpg",
-//     "image2.jpg",
-//     "image3.jpg"
-//   ]
-// }
+  return (
+    <div className="flex flex-col gap-10 w-full">
+      <SearchBox />
+      {data.map(({ name, icon: Icon, status }) => (
+        <div key={name} className="flex gap-3 items-center">
+          <Icon className="font-semibold size-5" />
+          <h1
+            className={clsx(
+              "inline-flex items-center rounded-full px-2 py-1 text-sm",
+              {
+                "bg-gray-100 text-gray-500": status === "pending",
+                "bg-green-500 text-white": status === "paid",
+              }
+            )}
+          >
+            {name}
+          </h1>
+        </div>
+      ))}
+    </div>
+  );
+};

@@ -1,34 +1,64 @@
 "use client";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Link from "next/link"; // Assuming you're using Next.js
 import Image from "next/image";
-import Link from "next/link";
+
 import brandlogo from "../assets/brandlogo.jpg";
+import SearchBox from "./searchbox/searchbox";
+
 const Navbar = () => {
   return (
-    <AppBar position="static">
-      <Toolbar>
+    <AppBar
+      sx={{
+        backgroundColor: "#FFFFF",
+        color: "black",
+        boxShadow: "none",
+        borderBottom: "1px solid grey",
+      }}
+      position="static"
+    >
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", px: 3 }}>
         {/* Logo Section */}
-        <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <Image
             src={brandlogo} // Replace with your logo path
             alt="Logo"
-            style={{ height: 40, width: "100px" }} // Adjust the height as needed
+            style={{ height: 40, width: "auto" }}
           />
         </Box>
 
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          <Link href="/">Find Your Dream PG</Link>
-        </Typography>
-
-        <Button color="inherit" component={Link} href="/list-pg">
-          List PG
-        </Button>
-        <Button color="inherit" component={Link} href="/login">
-          Login
-        </Button>
-        <Button color="inherit" component={Link} href="/signup">
-          Signup
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="outlined"
+            component={Link}
+            href="/login"
+            sx={{
+              borderColor: "black",
+              color: "black",
+              textTransform: "none",
+              "&:hover": { backgroundColor: "black", color: "white" },
+            }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="contained"
+            component={Link}
+            href="/signup"
+            sx={{
+              backgroundColor: "black",
+              color: "white",
+              textTransform: "none",
+              "&:hover": { backgroundColor: "#444" },
+            }}
+          >
+            Signup
+          </Button>
+        </Box>
       </Toolbar>
     </AppBar>
   );

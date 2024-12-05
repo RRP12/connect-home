@@ -9,6 +9,8 @@ export default function AuthButtonClinet({ session }) {
   const supabase = createClientComponentClient();
 
   async function handelSignIn() {
+    console.log("clciked");
+
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {

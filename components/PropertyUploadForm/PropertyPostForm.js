@@ -1,20 +1,18 @@
 "use client";
 
-import { Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useState } from "react";
-import BaiscDetils from "./basicDetailsform";
-import MultistepForm from "../MultistepForm";
+import PropertyPostForm from "./basicDetailsform";
+import StepperForm from "../stepperFrom";
 
 export default function PropertyListingForm() {
   const [currentStep, setcurrentStep] = useState(0);
   return (
-    <>
-      <Typography variant="h1" component="h2">
-        Please add the property details
-      </Typography>
-
-      {/* <BaiscDetils /> */}
-      <MultistepForm />
-    </>
+    <Container maxWidth="md">
+      <Box sx={{ height: "100vh" }}>
+        {/* <PropertyPostForm /> */}
+        <StepperForm />
+      </Box>
+    </Container>
   );
 }

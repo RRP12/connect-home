@@ -1,24 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-export default function LocationComponent() {
-  const [location, setLocation] = useState({ latitude: null, longitude: null });
-  const [formattedAddress, setFormattedAddress] = useState(""); // Store formatted address
+import MyLocationIcon from "@mui/icons-material/MyLocation";
+export default function GetLocationComponent() {
+  const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
+  const [propertyName, setPropertyName] = useState(""); // Example property name
 
-  // Get the user's current geolocation
   useEffect(() => {
-    if (navigator.geolocation) {
+    // Check if geolocation is available in the browser
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
+          const latitude = position?.coords.latitude;
+          const longitude = position?.coords.longitude;
+
+          const options = {
+            method: "GET",
+            headers: { accept: "application/json" },
+          };
+
+          fetch(
+            `https://us1.locationiq.com/v1/reverse?key=pk.1f9c41d0bd69b268097b057cd9345bfd&lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+            options
+          )
+            .then((res) => res.json())
+            .then((res) => {
+              const address = res.address;
+              // Combine the fetched address with the property name
+              const fullAddress = `${propertyName}, ${address.road || ""}, ${
+                address.suburb || ""
+              }, ${address.city || ""}, ${address.state || ""}, ${
+                address.country || ""
+              }`;
+              setLocation(fullAddress); // Update state with the full address
+            })
+            .catch((err) => setError("Error: " + err.message));
         },
         (err) => {
-          setError(err.message);
+          setError("Geolocation error: " + err.message); // Handle geolocation error
         }
       );
     } else {
@@ -26,53 +46,17 @@ export default function LocationComponent() {
     }
   }, []);
 
-  // Fetch location data from Geoapify
-  useEffect(() => {
-    if (location.latitude && location.longitude) {
-      const getLocationData = async () => {
-        const requestOptions = {
-          method: "GET",
-        };
-
-        try {
-          const response = await fetch(
-            `https://api.geoapify.com/v1/geocode/reverse?lat=${location.latitude}&lon=${location.longitude}&apiKey=b66a5b1bb17f4410bb2bfe2c40e69fb8`,
-            requestOptions
-          );
-          const data = await response.json();
-
-          // Check if the API returned results
-          if (data.features && data.features.length > 0) {
-            const address = data.features[0].properties;
-            // Format the address
-            setFormattedAddress(
-              `${address.street || ""}, ${address.suburb || ""}, ${
-                address.city || ""
-              }, ${address.state || ""}`
-            );
-          } else {
-            setFormattedAddress("Address not found.");
-          }
-        } catch (error) {
-          setError("Error fetching location data.");
-          console.error("Error:", error);
-        }
-      };
-
-      getLocationData();
-    }
-  }, [location]);
-
   return (
     <div>
       {error ? (
-        <p>Error: {error}</p>
-      ) : (
+        <p>{error}</p>
+      ) : location ? (
         <p>
-          {formattedAddress
-            ? `Location: ${formattedAddress}`
-            : "Getting location..."}
+          <MyLocationIcon />
+          <span> Your location</span>: {location}
         </p>
+      ) : (
+        <p>Getting location...</p>
       )}
     </div>
   );
