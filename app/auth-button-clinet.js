@@ -1,17 +1,15 @@
 "use client"
 
 import { Button } from "@mui/material"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../utils/supabase/client"
 import { useRouter } from "next/navigation"
 import React from "react"
 
 export default function AuthButtonClinet({ session }) {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   async function handelSignIn() {
-
-
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
@@ -24,6 +22,8 @@ export default function AuthButtonClinet({ session }) {
     await supabase.auth.signOut()
     router.refresh() // Refresh the page to log out
   }
+
+  console.log("session", session)
 
   return session ? (
     <Button

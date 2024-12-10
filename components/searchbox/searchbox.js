@@ -1,6 +1,6 @@
 "use client"
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../../utils/supabase/client"
 import { useEffect, useState } from "react"
 
 const { TextField, InputAdornment } = require("@mui/material")
@@ -9,7 +9,7 @@ const { SearchIcon } = require("lucide-react")
 const SearchBox = () => {
   const [query, setQuery] = useState("")
 
-  let supabase = createClientComponentClient()
+  let supabase = createClient()
 
   useEffect(() => {
     async function fetchProperties() {

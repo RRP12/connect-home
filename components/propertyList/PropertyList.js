@@ -1,13 +1,9 @@
 import PropertyCard from "../FacebookPropertyListing"
-import { Suspense } from "react"
-import { fetchUsersPropeties } from "../../app/lib/data"
-// import { useEffect, useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { useDebouncedCallback } from "use-debounce"
-import { Input, Space } from "antd"
-
+import { createClient } from "../../utils/supabase/server"
 export default async function PropertyList() {
-  let data = await fetchUsersPropeties()
+  let supabase = await createClient()
+  let { data: properties } = await supabase.from("properties").select("*")
+
   // let supabase = createClientComponentClient()
   // const [PropertiesList, setPropertiesList] = useState([])
 
@@ -86,9 +82,10 @@ export default async function PropertyList() {
 
   return (
     <div>
-      {data?.map((property) => (
-        <PropertyCard key={property.id} property={property} />
-      ))}
+      {properties &&
+        properties?.map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
     </div>
   )
 }

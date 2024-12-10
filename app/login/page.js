@@ -1,17 +1,17 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { redirect } from "next/dist/server/api-utils";
-import { cookies } from "next/headers";
-import AuthButtonClinet from "../auth-button-clinet";
+import { createClient } from "../../utils/supabase/server"
+import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
+import AuthButtonClinet from "../auth-button-clinet"
 export default async function Login() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient()
 
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await supabase?.auth?.getSession()
 
   if (session) {
-    redirect("/");
+    redirect("/")
   }
 
-  return <AuthButtonClinet session={session} />;
+  return <AuthButtonClinet session={session} />
 }

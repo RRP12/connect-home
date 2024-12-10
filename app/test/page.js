@@ -2,14 +2,14 @@
 
 import { HfInference } from "@huggingface/inference"
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../../utils/supabase/client"
 import { useEffect, useState } from "react"
 import { formatedData } from "../../utils/aidata"
 const client = new HfInference(process.env.HUGGINGFACE_API_TOKEN)
 
 console.log("formatedData", formatedData)
 
-let supabase = createClientComponentClient()
+let supabase = createClient()
 
 const hf = new HfInference(process.env.HUGGINGFACE_API_TOKEN)
 export default function FloatingMessages() {

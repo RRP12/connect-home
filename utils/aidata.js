@@ -1,7 +1,7 @@
 "use client"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../utils/supabase/client"
 
-let supabase = createClientComponentClient()
+let supabase = createClient()
 
 async function getdata(params) {
   let { data: properties, error } = await supabase

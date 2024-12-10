@@ -2,14 +2,14 @@
 
 import { HfInference } from "@huggingface/inference"
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../../../utils/supabase/client"
 import { useState } from "react"
 import { formatedData } from "../../../utils/aidata"
 const client = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
 
 console.log("formatedData", formatedData)
 
-let supabase = createClientComponentClient()
+let supabase = createClient()
 
 const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
 export default function FloatingMessages() {
@@ -21,6 +21,7 @@ export default function FloatingMessages() {
   let [resposne, setResponse] = useState("")
   let [loadingResponse, setLoadingResponse] = useState(false)
   console.log("loading", loading)
+  console.log("error", error)
 
   const toggleOpen = () => setIsOpen(!isOpen)
   const modelId = "intfloat/e5-base-v2" // Change to any other model if necessary
@@ -67,8 +68,12 @@ export default function FloatingMessages() {
 
       const data = await response.json()
 
+      console.log("data", data)
+
       return data[0]
     } catch (err) {
+      console.log("err", err)
+
       setError(err?.message) // Handle errors
     } finally {
       setLoading(false) // Stop loading

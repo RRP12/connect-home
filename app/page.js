@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../utils/supabase/server"
 import { cookies } from "next/headers"
 import AuthButtonServer from "./auth-button-server"
 import { redirect } from "next/navigation"
@@ -13,17 +13,23 @@ import { Suspense } from "react"
 import { TableRowSkeleton } from "./skeletons"
 
 export default async function Home() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient({ cookies })
+
+  // console.log("supabase", supabase)
 
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth?.getSession()
+
+  console.log("session", session)
 
   if (!session) {
     redirect("/login")
   }
 
-  let user = await supabase.auth.getUser()
+  // let user = await supabase.auth.getUser()
+
+  // console.log("user", user)
 
   return (
     <>
@@ -60,8 +66,7 @@ const Aside = () => {
   ]
 
   return (
-    <div className="hidden md:flex my-4 flex flex-col gap-10 ">
-      {/* <AuthButtonServer /> */}
+    <div className="md:flex my-4 flex flex-col gap-10 ">
       <SearchBox />
       {data.map(({ name, icon: Icon, status }) => (
         <div key={name} className="flex gap-3 items-center">

@@ -1,16 +1,14 @@
-import { Suspense } from "react";
-import { lusitana } from "../../ui/fonts";
-import RevenueChart from "../../ui/dashboard/propertyList";
-import RevenueChartSkeleton from "../../skeletons";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-("next/headers");
+import { Suspense } from "react"
+import { lusitana } from "../../ui/fonts"
+import RevenueChart from "../../ui/dashboard/propertyList"
+import RevenueChartSkeleton from "../../skeletons"
+import { createClient } from "../../../utils/supabase/server"
+import { cookies } from "next/headers"
+;("next/headers")
 export default async function Page() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = createClient({ cookies })
 
-  let user = await supabase.auth.getUser();
-
-  
+  let user = await supabase.auth.getUser()
 
   return (
     <main>
@@ -23,5 +21,5 @@ export default async function Page() {
         </Suspense>
       </div>
     </main>
-  );
+  )
 }

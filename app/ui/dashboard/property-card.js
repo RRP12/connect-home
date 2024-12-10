@@ -1,5 +1,5 @@
 "use client";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "../../../utils/supabase/client";
 import React, { useState } from "react";
 
 export default function PropertyCard({ property }) {
@@ -8,7 +8,7 @@ export default function PropertyCard({ property }) {
     property.property_title || "Untitled Property"
   );
 
-  let supabase = createClientComponentClient();
+  let supabase = createClient();
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
   };

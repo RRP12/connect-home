@@ -1,8 +1,8 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../../../utils/supabase/server"
 import { cookies } from "next/headers"
 export default async function PropertyPage({ params }) {
   const { id: propertyID } = params
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient({ cookies })
   let { data: property, error } = await supabase
     .from("properties")
     .select("*")

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import useGeolocation from "../../utils/location"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../../utils/supabase/client"
 import LocationSelector from "../locationSelector/LocationSelector"
 
 export default function PropertyListingStepperForm() {
@@ -11,7 +11,7 @@ export default function PropertyListingStepperForm() {
   const [Address, setAddress] = useState("")
   const [userId, setUserId] = React.useState()
 
-  let supabase = createClientComponentClient()
+  let supabase = createClient()
   function getGeolocation() {
     return new Promise((resolve, reject) => {
       const options = {

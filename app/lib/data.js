@@ -1,40 +1,38 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-let supabase = createServerComponentClient({ cookies });
+import { createClient } from "../../utils/supabase/server"
+import { cookies } from "next/headers"
+let supabase = createClient({ cookies })
 export async function fetchUsersPropetiesbyId(userId) {
- 
-
   if (userId) {
     try {
       let { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("user_id", userId);
+        .eq("user_id", userId)
 
       if (error) {
-        console.error("Database Error:", error);
-        throw new Error("Failed to fetch revenue data.");
+        console.error("Database Error:", error)
+        throw new Error("Failed to fetch revenue data.")
       }
-      return data;
+      return data
     } catch (error) {
-      console.error("Database Error:", error);
-      throw new Error("Failed to fetch revenue data.");
+      console.error("Database Error:", error)
+      throw new Error("Failed to fetch revenue data.")
     }
   }
 }
 
 export async function fetchUsersPropeties() {
   try {
-    let { data, error } = await supabase.from("properties").select("*");
+    let { data, error } = await supabase.from("properties").select("*")
 
     if (error) {
-      console.error("Database Error:", error);
-      throw new Error("Failed to fetch revenue data.");
+      console.error("Database Error:", error)
+      throw new Error("Failed to fetch revenue data.")
     }
-    return data;
+    return data
   } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch revenue data.");
+    console.error("Database Error:", error)
+    throw new Error("Failed to fetch revenue data.")
   }
 }
 

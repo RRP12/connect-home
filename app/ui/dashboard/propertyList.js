@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "../../../utils/supabase/client"
 import { fetchUsersPropetiesbyId } from "../../lib/data"
 import { cookies } from "next/headers"
 import PropertyCard from "./property-card"
@@ -6,7 +6,7 @@ export default async function RevenueChart({ userId }) {
   const properties = await fetchUsersPropetiesbyId(userId)
   return <PropertyCards properties={properties} />
 }
-let supabase = createServerComponentClient({ cookies })
+let supabase = createClient({ cookies })
 async function handelClick(property_id) {
   "use server"
   const { data, error } = await supabase
