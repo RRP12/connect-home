@@ -5,13 +5,13 @@ import { HfInference } from "@huggingface/inference"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useEffect, useState } from "react"
 import { formatedData } from "../../utils/aidata"
-const client = new HfInference("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")
+const client = new HfInference(process.env.HUGGINGFACE_API_TOKEN)
 
 console.log("formatedData", formatedData)
 
 let supabase = createClientComponentClient()
 
-const hf = new HfInference("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")
+const hf = new HfInference(process.env.HUGGINGFACE_API_TOKEN)
 export default function FloatingMessages() {
   const [isOpen, setIsOpen] = useState(false)
   let [input, setInput] = useState("")
@@ -22,7 +22,7 @@ export default function FloatingMessages() {
 
   const toggleOpen = () => setIsOpen(!isOpen)
   const modelId = "intfloat/e5-base-v2" // Change to any other model if necessary
-  const hfToken = "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" // Replace with your Hugging Face API token
+  const hfToken = process.env.HUGGINGFACE_API_TOKEN // Replace with your Hugging Face API token
 
   const apiUrl = `https://api-inference.huggingface.co/pipeline/feature-extraction/${modelId}`
   // useEffect(() => {
@@ -44,7 +44,7 @@ export default function FloatingMessages() {
 
   const createEmbedding = async (inputText) => {
     const modelId = "intfloat/e5-base-v2"
-    const hfToken = "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" // Replace with your Hugging Face API token
+    const hfToken = process.env.HUGGINGFACE_API_TOKEN
     const apiUrl = `https://api-inference.huggingface.co/pipeline/feature-extraction/${modelId}`
 
     const response = await fetch(apiUrl, {
