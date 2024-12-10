@@ -3,7 +3,6 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import AuthButtonServer from "./auth-button-server"
 import { redirect } from "next/navigation"
-import Container from "./ui/container/container"
 
 import PropertyList from "../components/propertyList/PropertyList"
 import { CiHome, CiBellOn, CiChat1, CiUser } from "react-icons/ci"
@@ -31,7 +30,7 @@ export default async function Home() {
       <div className="md:hidden">
         <SearchBox />
       </div>
-      <Container>
+      <div className="container">
         <div
           style={{
             overflow: "auto",
@@ -47,7 +46,7 @@ export default async function Home() {
         </div>
 
         <Aside />
-      </Container>
+      </div>
     </>
   )
 }
