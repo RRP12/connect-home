@@ -22,7 +22,7 @@
     "@mui/material": "^6.1.6",
     "@mui/styles": "^6.1.6",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "@supabase/supabase-js": "^2.46.1",
+    "@supabase/supabase-js": "^2.47.3",
     "@xenova/transformers": "^2.4.2",
     "antd": "",
     "bootstrap": "^5.3.3",
