@@ -57,6 +57,7 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   font-size: 14px;
+  margin: 0 auto;
 }
 
 /* Breakpoint for tablets (768px and above) */
