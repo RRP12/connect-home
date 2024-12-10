@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 import AuthButtonServer from "./auth-button-server"
 import { redirect } from "next/navigation"
 import Container from "./ui/container/container"
+
 import PropertyList from "../components/propertyList/PropertyList"
 import { CiHome, CiBellOn, CiChat1, CiUser } from "react-icons/ci"
 import SearchBox from "../components/searchbox/searchbox"
