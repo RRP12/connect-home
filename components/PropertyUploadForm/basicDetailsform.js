@@ -1,44 +1,44 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState } from "react";
-import useGeolocation from "../../utils/location";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import LocationSelector from "../locationSelector/LocationSelector";
+import React, { useEffect, useState } from "react"
+import useGeolocation from "../../utils/location"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import LocationSelector from "../locationSelector/LocationSelector"
 
 export default function PropertyListingStepperForm() {
-  const [locationData, setLocationData] = useState({});
-  const [loading, setLoading] = useState(true); // For loading indicator
-  const [Address, setAddress] = useState("");
-  const [userId, setUserId] = React.useState();
-  console.log("userId", userId);
-  let supabase = createClientComponentClient();
+  const [locationData, setLocationData] = useState({})
+  const [loading, setLoading] = useState(true) // For loading indicator
+  const [Address, setAddress] = useState("")
+  const [userId, setUserId] = React.useState()
+
+  let supabase = createClientComponentClient()
   function getGeolocation() {
     return new Promise((resolve, reject) => {
       const options = {
         enableHighAccuracy: true,
         timeout: 5000,
         maximumAge: 0,
-      };
+      }
 
       function success(pos) {
-        const crd = pos.coords;
+        const crd = pos.coords
         resolve({
           latitude: crd.latitude,
           longitude: crd.longitude,
           accuracy: crd.accuracy,
-        });
+        })
       }
 
       function error(err) {
-        reject(`ERROR(${err.code}): ${err.message}`);
+        reject(`ERROR(${err.code}): ${err.message}`)
       }
 
       if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(success, error, options);
+        navigator.geolocation.getCurrentPosition(success, error, options)
       } else {
-        reject("Geolocation is not supported by this browser.");
+        reject("Geolocation is not supported by this browser.")
       }
-    });
+    })
   }
 
   useEffect(() => {
@@ -46,33 +46,33 @@ export default function PropertyListingStepperForm() {
       const {
         data: { user },
         error,
-      } = await supabase.auth.getUser();
+      } = await supabase.auth.getUser()
       if (user) {
-        setUserId(user.id);
+        setUserId(user.id)
       } else if (error) {
-        console.error("Error fetching user:", error.message);
+        console.error("Error fetching user:", error.message)
       }
-    };
+    }
 
-    getUserId();
-  }, [supabase]);
+    getUserId()
+  }, [supabase])
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       getGeolocation()
         .then((data) => {
-          setLocationData(data);
-          setLoading(false);
+          setLocationData(data)
+          setLoading(false)
         })
         .catch((err) => {
-          console.error("Error fetching geolocation:", err);
-          setLoading(false);
-        });
-    }, 1000); // Debounce by 1 second
+          console.error("Error fetching geolocation:", err)
+          setLoading(false)
+        })
+    }, 1000) // Debounce by 1 second
 
     // Cleanup function to clear the timeout if the component unmounts
-    return () => clearTimeout(timeoutId);
-  }, []); // Only run on mount
+    return () => clearTimeout(timeoutId)
+  }, []) // Only run on mount
 
   useEffect(() => {
     if (locationData) {
@@ -80,14 +80,10 @@ export default function PropertyListingStepperForm() {
         `https://us1.locationiq.com/v1/reverse?key=pk.1f9c41d0bd69b268097b057cd9345bfd&lat=${locationData.latitude}&lon=${locationData.longitude}&format=json&`
       )
         .then((res) => res.json())
-        .then((res) => {
-          console.log("Reverse geocode result:", res);
-        })
-        .catch((err) =>
-          console.error("Error fetching reverse geocoding:", err)
-        );
+        .then((res) => {})
+        .catch((err) => console.error("Error fetching reverse geocoding:", err))
     }
-  }, [locationData]); // This runs when locationData is updated
+  }, [locationData]) // This runs when locationData is updated
 
   const validateCurrentStep = () => {
     switch (activeStep) {
@@ -99,89 +95,87 @@ export default function PropertyListingStepperForm() {
           "city",
           "state",
           "price",
-        ];
-        const missingFields = requiredFields.filter(
-          (field) => !formData[field]
-        );
+        ]
+        const missingFields = requiredFields.filter((field) => !formData[field])
 
         if (missingFields.length > 0) {
           // Optionally show error messages for missing fields
           alert(
             `Please fill in all required fields: ${missingFields.join(", ")}`
-          );
-          return false;
+          )
+          return false
         }
-        return true;
+        return true
 
       case 1: // Images step
         if (formData.images.length === 0) {
-          alert("Please upload at least one image");
-          return false;
+          alert("Please upload at least one image")
+          return false
         }
-        return true;
+        return true
 
       default:
-        return true;
+        return true
     }
-  };
+  }
 
   const handleNext = () => {
     // Validate current step's data before moving to next step
-    const isStepValid = validateCurrentStep();
+    const isStepValid = validateCurrentStep()
 
     if (isStepValid) {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1)
     }
-  };
+  }
 
   // Function to validate the current step's data
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
 
-  const steps = ["Property Details", "Images"];
+  const steps = ["Property Details", "Images"]
 
-  const { coordinates, error } = useGeolocation();
+  const { coordinates, error } = useGeolocation()
 
-  const [activeStep, setActiveStep] = useState(0);
-  const [images, setImages] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [activeStep, setActiveStep] = useState(0)
+  const [images, setImages] = useState([])
+  const [openDialog, setOpenDialog] = useState(false)
 
   const [formData, setformData] = useState({
     images: [],
-  });
+  })
 
   function handelChange(e) {
-    setformData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setformData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   async function getUserLocation() {
     let { data: properties, error } = await supabase
       .from("properties")
-      .select("location");
+      .select("location")
   }
-  getUserLocation();
+  getUserLocation()
 
   const handleFileChange = (event) => {
     if (event.target.files) {
-      const uploadedFiles = Array.from(event.target.files);
+      const uploadedFiles = Array.from(event.target.files)
       setformData((prevState) => ({
         ...prevState,
         images: [...prevState.images, ...uploadedFiles].slice(0, 5), // Limit to 5 files
-      }));
+      }))
     }
-  };
+  }
 
   async function handelSubmit(e) {
-    e.preventDefault();
+    e.preventDefault()
 
     // Array to store public URLs of uploaded images
-    const uploadedImageUrls = [];
+    const uploadedImageUrls = []
 
     for (let i = 0; i < formData?.images?.length; i++) {
-      const file = formData.images[i]; // Get each file
-      const uniqueName = `${Date.now()}-${file.name}`; // Create a unique filename
+      const file = formData.images[i] // Get each file
+      const uniqueName = `${Date.now()}-${file.name}` // Create a unique filename
 
       // Upload the file to Supabase Storage
       const { data, error } = await supabase.storage
@@ -189,20 +183,20 @@ export default function PropertyListingStepperForm() {
         .upload(`public/${uniqueName}`, file, {
           cacheControl: "3600",
           upsert: false,
-        });
+        })
 
       if (error) {
-        console.error(`Error uploading ${file.name}:`, error.message);
-        continue; // Skip this file if there's an error
+        console.error(`Error uploading ${file.name}:`, error.message)
+        continue // Skip this file if there's an error
       }
 
       // Generate public URL for the uploaded file
       const publicUrl = supabase.storage
         .from("property-images")
-        .getPublicUrl(`public/${uniqueName}`).data.publicUrl;
+        .getPublicUrl(`public/${uniqueName}`).data.publicUrl
 
       // Add the public URL to the array
-      uploadedImageUrls.push(publicUrl);
+      uploadedImageUrls.push(publicUrl)
     }
 
     // Prepare data for insertion into the properties table
@@ -222,9 +216,7 @@ export default function PropertyListingStepperForm() {
       // location: "POINT(-73.946823 40.807416)",
       images: uploadedImageUrls, // Store the array of image URLs
       user_id: userId,
-    };
-
-    console.log("propertyData", propertyData);
+    }
 
     // Insert data into the properties table
     const { error } = await supabase.from("properties").insert([
@@ -233,25 +225,21 @@ export default function PropertyListingStepperForm() {
       //   name: "Supa Burger",
       //   location: "POINT(-73.946823 40.807416)",
       // },
-    ]);
+    ])
 
     if (error) {
-      console.error("Error inserting property:", error.message);
+      console.error("Error inserting property:", error.message)
     } else {
-      console.log("Property successfully added!");
+      throw error
     }
 
     setformData({
       images: [],
-    });
+    })
   }
 
   return (
     <div className="container mx-auto px-4 py-8 ">
-      {JSON.stringify(formData)}
-      <p>
-        User Location: {locationData.latitude}, {locationData.longitude}
-      </p>
       {/* <button onClick={handleGetLocation}>get location </button> */}
       <div className="bg-white shadow-md rounded-lg p-6 max-w-2xl mx-auto">
         <h1 className="text-2xl font-medium mb-6 text-center">
@@ -473,5 +461,5 @@ export default function PropertyListingStepperForm() {
         </form>
       </div>
     </div>
-  );
+  )
 }

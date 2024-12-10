@@ -1,32 +1,57 @@
-"use client";
+"use client"
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { Button } from "@mui/material"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useRouter } from "next/navigation"
+import React from "react"
 
 export default function AuthButtonClinet({ session }) {
-  const router = useRouter();
-  const supabase = createClientComponentClient();
+  const router = useRouter()
+  const supabase = createClientComponentClient()
 
   async function handelSignIn() {
-    console.log("clciked");
+
 
     await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
         redirectTo: "http://localhost:3000/auth/callback",
       },
-    });
+    })
   }
 
   async function handelSignOut() {
-    await supabase.auth.signOut();
-    router.refresh(); // Refresh the page to log out
+    await supabase.auth.signOut()
+    router.refresh() // Refresh the page to log out
   }
 
   return session ? (
-    <button onClick={handelSignOut}>logout</button>
+    <Button
+      onClick={handelSignOut}
+      variant="contained"
+      href="/signup"
+      sx={{
+        backgroundColor: "black",
+        color: "white",
+        textTransform: "none",
+        "&:hover": { backgroundColor: "#444" },
+      }}
+    >
+      SignOut
+    </Button>
   ) : (
-    <button onClick={handelSignIn}>login</button>
-  );
+    <Button
+      onClick={handelSignIn}
+      variant="outlined"
+      href="/login"
+      sx={{
+        borderColor: "black",
+        color: "black",
+        textTransform: "none",
+        "&:hover": { backgroundColor: "black", color: "white" },
+      }}
+    >
+      Login
+    </Button>
+  )
 }

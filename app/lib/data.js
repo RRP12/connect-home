@@ -2,7 +2,7 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 let supabase = createServerComponentClient({ cookies });
 export async function fetchUsersPropetiesbyId(userId) {
-  console.log("userId from data.js ", userId);
+ 
 
   if (userId) {
     try {

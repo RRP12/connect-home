@@ -1,22 +1,19 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { fetchUsersPropetiesbyId } from "../../lib/data";
-import { cookies } from "next/headers";
-import PropertyCard from "./property-card";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { fetchUsersPropetiesbyId } from "../../lib/data"
+import { cookies } from "next/headers"
+import PropertyCard from "./property-card"
 export default async function RevenueChart({ userId }) {
-  const properties = await fetchUsersPropetiesbyId(userId);
-
-  console.log("properties", properties);
-
-  return <PropertyCards properties={properties} />;
+  const properties = await fetchUsersPropetiesbyId(userId)
+  return <PropertyCards properties={properties} />
 }
-let supabase = createServerComponentClient({ cookies });
+let supabase = createServerComponentClient({ cookies })
 async function handelClick(property_id) {
-  "use server";
+  "use server"
   const { data, error } = await supabase
     .from("properties")
     .update({ property_title: "salm hayak" })
     .eq("id", property_id)
-    .select();
+    .select()
 }
 
 const PropertyCards = ({ properties }) => {
@@ -28,5 +25,5 @@ const PropertyCards = ({ properties }) => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}

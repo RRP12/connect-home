@@ -1,54 +1,53 @@
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import { styled } from "@mui/system";
-import BasicDetailsform from "./PropertyUploadForm/basicDetailsform";
+import * as React from "react"
+import Box from "@mui/material/Box"
+import Stepper from "@mui/material/Stepper"
+import Step from "@mui/material/Step"
+import StepLabel from "@mui/material/StepLabel"
+import Button from "@mui/material/Button"
+import Typography from "@mui/material/Typography"
+import TextField from "@mui/material/TextField"
+import { styled } from "@mui/system"
+import BasicDetailsform from "./PropertyUploadForm/basicDetailsform"
 
-const steps = ["Owner Details", "Upload Images", "Default Step"];
+const steps = ["Owner Details", "Upload Images", "Default Step"]
 
 const FileInput = styled("input")({
-  display: "none",
-});
-
+  display: "&apos;none&apos;",
+})
 export default function StepperForm() {
-  const [activeStep, setActiveStep] = React.useState(0);
+  const [activeStep, setActiveStep] = React.useState(0)
 
   // Form States
-  const [ownerName, setOwnerName] = React.useState("");
-  const [ownerPhone, setOwnerPhone] = React.useState("");
-  const [uploadedFiles, setUploadedFiles] = React.useState([]);
+  const [ownerName, setOwnerName] = React.useState("")
+  const [ownerPhone, setOwnerPhone] = React.useState("")
+  const [uploadedFiles, setUploadedFiles] = React.useState([])
 
   // Handle Step Changes
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+  }
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
 
   const handleReset = () => {
-    setActiveStep(0);
-    setOwnerName("");
-    setOwnerPhone("");
-    setUploadedFiles([]);
-  };
+    setActiveStep(0)
+    setOwnerName("")
+    setOwnerPhone("")
+    setUploadedFiles([])
+  }
 
   // File Upload Handler
   const handleFileChange = (event) => {
-    setUploadedFiles([...uploadedFiles, ...event.target.files]);
-  };
+    setUploadedFiles([...uploadedFiles, ...event.target.files])
+  }
 
   // Render Content for Each Step
   const renderStepContent = (step) => {
     switch (step) {
       case 0: // Owner Details
-        return <BasicDetailsform />;
+        return <BasicDetailsform />
       case 1: // Upload Images
         return (
           <Box>
@@ -74,13 +73,13 @@ export default function StepperForm() {
               )}
             </Box>
           </Box>
-        );
+        )
       case 2: // Default Step
-        return <Typography>Hello World</Typography>;
+        return <Typography>Hello World</Typography>
       default:
-        return "Unknown Step";
+        return "Unknown Step"
     }
-  };
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -94,7 +93,7 @@ export default function StepperForm() {
       {activeStep === steps.length ? (
         <React.Fragment>
           <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - here's the summary:
+            All steps completed - heres the summary:
           </Typography>
           <Typography>Owner Name: {ownerName}</Typography>
           <Typography>Owner Phone: {ownerPhone}</Typography>
@@ -132,5 +131,5 @@ export default function StepperForm() {
         </React.Fragment>
       )}
     </Box>
-  );
+  )
 }

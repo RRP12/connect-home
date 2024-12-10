@@ -1,42 +1,39 @@
-"use client";
+"use client"
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useEffect, useState } from "react"
 
-const { TextField, InputAdornment } = require("@mui/material");
-const { SearchIcon } = require("lucide-react");
+const { TextField, InputAdornment } = require("@mui/material")
+const { SearchIcon } = require("lucide-react")
 
-const SearchBox = () =>
-  // { setPropertiesList }
+const SearchBox = () => {
+  const [query, setQuery] = useState("")
 
-  {
-    const [query, setQuery] = useState("");
+  let supabase = createClientComponentClient()
 
-    let supabase = createClientComponentClient();
+  useEffect(() => {
+    async function fetchProperties() {
+      let { data: properties, error } = await supabase
+        .from("properties")
+        .select("*")
+        .like("area_name", `%${query}%`)
 
-    useEffect(() => {
-      async function fetchProperties() {
-        let { data: properties, error } = await supabase
-          .from("properties")
-          .select("*")
-          .like("area_name", `%${query}%`);
+      // setPropertiesList(properties)
+    }
 
-        console.log("properties filteres ", properties);
+    fetchProperties()
+  }, [supabase, query])
+  const handleSearch = (event) => {
+    if (event.key === "Enter" && query.trim()) {
+      onSearch(query)
+    }
+  }
 
-        // setPropertiesList(properties);
-      }
-
-      fetchProperties();
-    }, [supabase, query]);
-    const handleSearch = (event) => {
-      if (event.key === "Enter" && query.trim()) {
-        onSearch(query);
-      }
-    };
-
-    return (
+  return (
+    <div className="flex items-center justify-center">
       <TextField
-        fullWidth={true}
+        className="w-[90%] sm:w-full  my-3"
+        fullWidth={false}
         variant="outlined"
         placeholder="Search..."
         value={query}
@@ -50,7 +47,8 @@ const SearchBox = () =>
           ),
         }}
       />
-    );
-  };
+    </div>
+  )
+}
 
-export default SearchBox;
+export default SearchBox

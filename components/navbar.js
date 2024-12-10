@@ -1,28 +1,27 @@
-"use client";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Link from "next/link"; // Assuming you're using Next.js
-import Image from "next/image";
-
-import brandlogo from "../assets/brandlogo.jpg";
-import SearchBox from "./searchbox/searchbox";
+import AppBar from "@mui/material/AppBar"
+import Toolbar from "@mui/material/Toolbar"
+import Box from "@mui/material/Box"
+import Image from "next/image"
+import brandlogo from "../assets/brandlogo.jpg"
+import AuthButtonServer from "../app/auth-button-server"
+import Link from "next/link"
 
 const Navbar = () => {
   return (
     <AppBar
       sx={{
-        backgroundColor: "#FFFFF",
-        color: "black",
         boxShadow: "none",
         borderBottom: "1px solid grey",
       }}
       position="static"
     >
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between", px: 3 }}>
-        {/* Logo Section */}
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          px: { xs: 2, sm: 3 }, // Padding for small and larger screens
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Image
             src={brandlogo} // Replace with your logo path
@@ -31,37 +30,34 @@ const Navbar = () => {
           />
         </Box>
 
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            variant="outlined"
-            component={Link}
-            href="/login"
-            sx={{
-              borderColor: "black",
-              color: "black",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "black", color: "white" },
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexDirection: { xs: "row", sm: "row" }, // Keep buttons in a row on all screen sizes
+            alignItems: "center", // Keep the items centered in small and larger screens
+          }}
+        >
+          <Link
+            style={{
+              border: "1px solid grey",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "red",
+              padding: "10px",
+              textAlign: "center",
+              width: "auto", // Prevent full width for buttons on small screens
             }}
+            href="/postproperty"
           >
-            Login
-          </Button>
-          <Button
-            variant="contained"
-            component={Link}
-            href="/signup"
-            sx={{
-              backgroundColor: "black",
-              color: "white",
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#444" },
-            }}
-          >
-            Signup
-          </Button>
+            Post Property
+          </Link>
+          <AuthButtonServer />
         </Box>
       </Toolbar>
     </AppBar>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

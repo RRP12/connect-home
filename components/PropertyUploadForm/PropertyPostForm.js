@@ -1,18 +1,18 @@
-"use client";
+"use client"
 
-import { Box, Container, Typography } from "@mui/material";
-import { useState } from "react";
-import PropertyPostForm from "./basicDetailsform";
-import StepperForm from "../stepperFrom";
+import { Box, Container } from "@mui/material"
+import { useState } from "react"
+import PropertyPostForm from "./basicDetailsform"
+import StepperForm from "../stepperFrom"
 
 export default function PropertyListingForm() {
-  const [currentStep, setcurrentStep] = useState(0);
+  const [currentStep, setcurrentStep] = useState(0)
   return (
     <Container maxWidth="md">
       <Box sx={{ height: "100vh" }}>
-        {/* <PropertyPostForm /> */}
+        <PropertyPostForm />
         <StepperForm />
       </Box>
     </Container>
-  );
+  )
 }

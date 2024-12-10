@@ -10,7 +10,7 @@ export default async function Page() {
 
   let user = await supabase.auth.getUser();
 
-  console.log("user?.data?.user?.id", user?.data?.user?.id);
+  
 
   return (
     <main>

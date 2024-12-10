@@ -18,7 +18,7 @@ export default function PropertyCard({ property }) {
   };
 
   const handleSave = async () => {
-    console.log("Updated Title:", title);
+  
 
     const { data, error } = await supabase
       .from("properties")
@@ -26,8 +26,7 @@ export default function PropertyCard({ property }) {
       .eq("id", property?.id)
       .select();
 
-    console.log("error", error);
-    console.log("data", data);
+    
 
     setIsEditing(false);
   };
