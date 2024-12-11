@@ -1,35 +1,31 @@
-"use client";
-import { createClient } from "../../../utils/supabase/client";
-import React, { useState } from "react";
+"use client"
+import { createClient } from "../../../utils/supabase/client"
+import React, { useState } from "react"
 
 export default function PropertyCard({ property }) {
-  const [isEditing, setIsEditing] = useState(false);
+  let supabase = createClient()
+  const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(
     property.property_title || "Untitled Property"
-  );
+  )
 
-  let supabase = createClient();
   const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-  };
+    setIsEditing(!isEditing)
+  }
 
   const handleTitleChange = (e) => {
-    setTitle(e.target.value);
-  };
+    setTitle(e.target.value)
+  }
 
   const handleSave = async () => {
-  
-
     const { data, error } = await supabase
       .from("properties")
       .update({ property_title: title })
       .eq("id", property?.id)
-      .select();
+      .select()
 
-    
-
-    setIsEditing(false);
-  };
+    setIsEditing(false)
+  }
 
   return (
     <div
@@ -79,5 +75,5 @@ export default function PropertyCard({ property }) {
         </p>
       </div>
     </div>
-  );
+  )
 }

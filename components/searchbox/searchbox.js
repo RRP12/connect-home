@@ -7,9 +7,8 @@ const { TextField, InputAdornment } = require("@mui/material")
 const { SearchIcon } = require("lucide-react")
 
 const SearchBox = () => {
-  const [query, setQuery] = useState("")
-
   let supabase = createClient()
+  const [query, setQuery] = useState("")
 
   useEffect(() => {
     async function fetchProperties() {

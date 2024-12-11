@@ -23,8 +23,6 @@ export default function AuthButtonClinet({ session }) {
     router.refresh() // Refresh the page to log out
   }
 
-  console.log("session", session)
-
   return session ? (
     <Button
       onClick={handelSignOut}

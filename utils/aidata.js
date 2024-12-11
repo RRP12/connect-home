@@ -2,9 +2,8 @@
 
 import { createClient } from "../utils/supabase/client"
 
-let supabase = createClient()
-
 async function getdata() {
+  let supabase = createClient()
   let { data: properties, error } = await supabase
     .from("properties")
     .select("*")
@@ -47,7 +46,7 @@ if (properties) {
     return formattedContent
   })
 } else {
-  console.log("no data")
+  console.error("no data")
 }
 
 export { formatedData }

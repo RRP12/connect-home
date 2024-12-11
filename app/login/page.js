@@ -1,6 +1,6 @@
 import { createClient } from "../../utils/supabase/server"
 import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
+
 import AuthButtonClinet from "../auth-button-clinet"
 export default async function Login() {
   const supabase = await createClient()

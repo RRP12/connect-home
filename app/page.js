@@ -1,6 +1,5 @@
 import styled from "styled-components"
 import { createClient } from "../utils/supabase/server"
-import { cookies } from "next/headers"
 import AuthButtonServer from "./auth-button-server"
 import { redirect } from "next/navigation"
 
@@ -13,23 +12,15 @@ import { Suspense } from "react"
 import { TableRowSkeleton } from "./skeletons"
 
 export default async function Home() {
-  const supabase = await createClient({ cookies })
-
-  // console.log("supabase", supabase)
+  const supabase = await createClient()
 
   const {
     data: { session },
   } = await supabase.auth?.getSession()
 
-  console.log("session", session)
-
   if (!session) {
     redirect("/login")
   }
-
-  // let user = await supabase.auth.getUser()
-
-  // console.log("user", user)
 
   return (
     <>

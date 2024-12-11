@@ -1,19 +1,3 @@
-// import { createClient } from "../../../utils/supabase/server"
-// import { NextResponse } from "next/server"
-// import { cookies } from "next/headers"
-// export async function GET(request) {
-//   const requestUrl = new URL(request.url)
-//   const code = requestUrl.searchParams.get("code")
-
-//   if (code) {
-//     const supabase = await createClient({ cookies })
-
-//     await supabase.auth.exchangeCodeForSession(code)
-//   }
-
-//   return NextResponse.redirect(requestUrl.origin)
-// }
-
 import { NextResponse } from "next/server"
 // The client you created from the Server-Side Auth instructions
 import { createClient } from "../../../utils/supabase/server"
@@ -24,8 +8,8 @@ export async function GET(request) {
   // if "next" is in param, use it as the redirect URL
   const next = searchParams.get("next") ?? "/"
 
+  const supabase = await createClient()
   if (code) {
-    const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
       const forwardedHost = request.headers.get("x-forwarded-host") // original origin before load balancer

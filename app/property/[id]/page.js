@@ -1,8 +1,8 @@
 import { createClient } from "../../../utils/supabase/server"
-import { cookies } from "next/headers"
+
 export default async function PropertyPage({ params }) {
   const { id: propertyID } = params
-  const supabase = await createClient({ cookies })
+  const supabase = await createClient()
   let { data: property, error } = await supabase
     .from("properties")
     .select("*")
