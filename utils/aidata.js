@@ -1,16 +1,17 @@
-"use client"
+"use server"
+
 import { createClient } from "../utils/supabase/client"
 
 let supabase = createClient()
 
-async function getdata(params) {
+async function getdata() {
   let { data: properties, error } = await supabase
     .from("properties")
     .select("*")
 
   return properties
 }
-
+s
 function formatPropertyContent(propertyData) {
   // Extract fields from the property data
   const propertyTitle = propertyData.property_title || "No title provided"
