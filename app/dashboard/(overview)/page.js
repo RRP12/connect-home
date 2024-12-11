@@ -2,11 +2,12 @@ import { Suspense } from "react"
 import { lusitana } from "../../ui/fonts"
 import RevenueChart from "../../ui/dashboard/propertyList"
 import RevenueChartSkeleton from "../../skeletons"
-import { createClient } from "../../../utils/supabase/server"
-import { cookies } from "next/headers"
-;("next/headers")
+
 export default async function Page() {
-  const supabase = createClient({ cookies })
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
 
   let user = await supabase.auth.getUser()
 
