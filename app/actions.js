@@ -21,7 +21,7 @@ const llm = new ChatMistralAI({
   model: "mistral-large-latest",
   temperature: 0,
   maxRetries: 2,
-  apiKey: "xnOlm4dSejslRCunWIrAg0q0OOAWNgIX",
+  apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_TOKEN,
   // other params...
 })
 
@@ -42,7 +42,7 @@ async function getResponse(input) {
 
     const embeddings = new MistralAIEmbeddings({
       model: "mistral-embed", // Default value
-      apiKey: "xnOlm4dSejslRCunWIrAg0q0OOAWNgIX",
+      apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_TOKEN,
     })
     const vectorStore = new SupabaseVectorStore(embeddings, {
       client,
