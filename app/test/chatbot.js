@@ -220,7 +220,7 @@ const llm = new ChatMistralAI({
   model: "mistral-large-latest",
   temperature: 0,
   maxRetries: 2,
-  apiKey: "WGvBvARoypHogjUIO6CUXiLFHT2ppfMw",
+  apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_TOKEN,
 })
 
 function formatConvHistory(messages) {
