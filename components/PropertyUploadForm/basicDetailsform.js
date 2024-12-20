@@ -202,7 +202,7 @@ export default function PropertyListingStepperForm() {
     // Prepare data for insertion into the properties table
     const propertyData = {
       property_type: formData.property_type,
-      property_title: formData.title,
+      property_title: formData.property_title,
       address: formData.address,
       city: formData.city,
       state: formData.state,

@@ -5,6 +5,7 @@ import { useState } from "react"
 import PropertyPostForm from "./basicDetailsform"
 import StepperForm from "../stepperFrom"
 
+
 export default function PropertyListingForm() {
   const [currentStep, setcurrentStep] = useState(0)
   return (

@@ -1,5 +1,5 @@
 import { createClient } from "../utils/supabase/server.js"
-import React from "react"
+
 import AuthButtonClinet from "./auth-button-clinet"
 export default async function AuthButtonServer() {
   const supabase = await createClient()

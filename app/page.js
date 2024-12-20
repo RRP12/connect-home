@@ -1,16 +1,11 @@
-import styled from "styled-components"
+// import styled from "styled-components"
 import { createClient } from "../utils/supabase/server"
 import AuthButtonServer from "./auth-button-server"
 import { redirect } from "next/navigation"
-
 import PropertyList from "../components/propertyList/PropertyList"
-import { CiHome, CiBellOn, CiChat1, CiUser } from "react-icons/ci"
-import SearchBox from "../components/searchbox/searchbox"
-import { lusitana } from "./ui/fonts"
-import clsx from "clsx"
 import { Suspense } from "react"
 import { TableRowSkeleton } from "./skeletons"
-
+import Chatbot from "./test/chatbot"
 export default async function Home() {
   const supabase = await createClient()
 
@@ -21,60 +16,42 @@ export default async function Home() {
   if (!session) {
     redirect("/login")
   }
-
   return (
-    <>
-      <div className="md:hidden">
-        <SearchBox />
-      </div>
-      <div className="container">
-        <div
-          style={{
-            overflow: "auto",
-            height: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
+    <div className="border-3 border-gray-500 py-6  h-screen w-full sm:w-[90%] m-auto flex flex-row gap-4 my-4  sm:flex-col mb-7   ">
+      <div className="flex gap-4 h-screen  flex-col  w-full sm:w-full sm:flex-row justify-between flex-1">
+        <div className="  border rounded px-4 py-4 w-[50%]  justify-between h-[80%]  flex-col   hidden    lg:flex">
+          <div className="flex flex-col">
+            <p>Results for</p>
+            <div className="flex gap-2 items-center align-center justify-start">
+              <div className="rounded-xl bg-blue-500 w-2 h-2"></div>
+              <p className="text-gray-400 font-semibold">
+                <span className="rounded-xl bg-blue-500 w-5 h-5"></span>
+                Kadam Wadi, Marol, Andheri East, Mumbai
+              </p>
+            </div>
+          </div>
+          <div className="mb-6">
+            <h1 className=" my-4 font-extralight text-gray-600">
+              AI Suggestions
+            </h1>
+
+            <div className="divide-y divide-dashed w-26 space-y-1">
+              <div>
+                <p className="text-gray-400">Pg in Andheri</p>
+              </div>
+              <p className="text-gray-400">Pg in marol</p>
+              <p className="text-gray-400">Pg in bandra</p>
+            </div>
+          </div>
+          <Chatbot />
+        </div>
+
+        <div className="overflow-auto  flex-1 w-full md:w-screen  h-[80%]  sm:h-[100%]  sm:w-[100%]  scrollbar scrollbar-thumb-gray-300 scrollbar-track-gray-100 ">
           <Suspense fallback={<TableRowSkeleton />}>
             <PropertyList />
           </Suspense>
         </div>
-
-        <Aside />
       </div>
-    </>
-  )
-}
-
-const Aside = () => {
-  const data = [
-    { name: "Explore", icon: CiHome, status: "pending" },
-    { name: "Notification", icon: CiBellOn, status: "pending" },
-    { name: "Messages", icon: CiChat1, status: "pending" },
-    { name: "Profile", icon: CiUser, status: "pending" },
-  ]
-
-  return (
-    <div className="md:flex my-4 flex flex-col gap-10 ">
-      <SearchBox />
-      {data.map(({ name, icon: Icon, status }) => (
-        <div key={name} className="flex gap-3 items-center">
-          <Icon className="font-semibold size-5" />
-          <h1
-            className={clsx(
-              "inline-flex items-center rounded-full px-2 py-1 text-sm",
-              {
-                "bg-gray-100 text-gray-500": status === "pending",
-                "bg-green-500 text-white": status === "paid",
-              }
-            )}
-          >
-            {name}
-          </h1>
-        </div>
-      ))}
     </div>
   )
 }

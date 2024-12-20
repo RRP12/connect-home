@@ -21,14 +21,18 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "app/test/page.js", "app/ui/fonts.js", "app/dashboard/(overview)/page.js"  ],
+    "**/*.tsx",
+    "app/test/page.js",
+    "app/ui/fonts.js",
+    "app/dashboard/(overview)/page.js"
+  ],
   "exclude": [
     "node_modules"
   ]

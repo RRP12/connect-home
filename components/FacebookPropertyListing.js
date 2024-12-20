@@ -9,7 +9,7 @@ import Link from "next/link"
 
 const images = [img4, img1, img2, img3, img4, img2]
 
-const PropertyCard = ({ property, title }) => {
+const PropertyCard = ({ property }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -58,34 +58,6 @@ const PropertyCard = ({ property, title }) => {
     }
   }, [isModalOpen])
 
-  // async function getlocation(property) {
-  //   const apiKey = process.env.Location_key; // Correct API key access
-
-  //   let [longitude, latitude] = property?.location?.coordinates;
-
-  //   try {
-  //     const response = await fetch(
-  //       `https://us1.locationiq.com/v1/reverse?key=pk.1f9c41d0bd69b268097b057cd9345bfd&lat=${longitude}&lon=${latitude}&format=json&addressdetails=1`
-  //     );
-  //     const data = await response.json();
-  //     return data; // Return the fetched location data
-  //   } catch (error) {
-  //     console.error("Error fetching location:", error);
-  //     return null; // Return null in case of error
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (property) {
-  //       const data = await getlocation(property); // Fetch the location data
-  //       setLocationData(data); // Set the data in state
-  //     }
-  //   };
-
-  //   fetchData(); // Call the async function
-  // }, [property]);
-
   const imageDetails = images.map((image) => {
     let area = image.height * image.width // Calculate the area
     return {
@@ -98,8 +70,29 @@ const PropertyCard = ({ property, title }) => {
 
   let sortedImages = imageDetails?.sort((a, b) => b.area - a.area)
 
+  function formatPostedDate(dateString) {
+    const date = new Date(dateString)
+    const now = new Date()
+    const timeDifference = now - date
+    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24))
+
+    let friendlyDate
+    if (daysDifference === 0) {
+      friendlyDate = "Today"
+    } else if (daysDifference === 1) {
+      friendlyDate = "Yesterday"
+    } else {
+      friendlyDate = `${daysDifference} days ago`
+    }
+
+    const options = { year: "numeric", month: "long", day: "numeric" }
+    const formattedDate = date.toLocaleDateString("en-US", options)
+
+    return `${friendlyDate} (${formattedDate})`
+  }
+
   return (
-    <div className=" flex flex-col gap-6 max-w-xl bg-white rounded-lg shadow border border-cyan-100 p-2">
+    <div className="flex flex-col gap-6 max-w-xl bg-white rounded-lg shadow border border-cyan-100 p-2">
       <Link href={`/property/${property?.id}`}>
         <div className="p-4">
           <div className="flex items-center gap-2">
@@ -111,30 +104,30 @@ const PropertyCard = ({ property, title }) => {
               />
             </div>
             <div className="flex-1">
-              <h3 className="subpixel-antialiased indent-1 text-gray-500 text-lg font-extralight">
+              <h3 className="subpixel-antialiased indent-1 text-gray-800 font-medium text-lg font-bold uppercase ">
                 {property?.property_title}
               </h3>
-              <p className="text-xs text-gray-500">{property?.created_at}</p>
+              <p className="text-xs text-gray-500">
+                {formatPostedDate(property?.created_at)}
+              </p>
             </div>
             <button className="text-gray-400">...</button>
           </div>
 
           <div className="mt-3 space-y-1 text-sm">
-            <p>{formattedPropertyData?.title}</p>
+            <h4>{formattedPropertyData?.title}</h4>
             <p>🌟🎄 Festive season offers 🤝💫</p>
             <p>*SINGLE OCCUPANCY* #male</p>
             <p className="text-blue-600">
               #LUXURIOUS #BEAUTIFUL #FULLYFURNISHED #BI... अधिक पढ़ें
             </p>
 
-            <div>
-              <h1 className="text-gray-500 text-sm">
-                <span className="font-bold">Price</span> {property?.price}
-              </h1>
-              <span className="text-gray-500 text-sm">Address</span>
-
-              <p className="grey-500">{property?.address}</p>
+            <div className="text-gray-500 flex items-center gap-3 ">
+              <p className="font-bold text-lg">Price:</p>
+              {property?.price}
             </div>
+            <span className="text-gray-500  font-bold text-lg">Address:</span>
+            <p className="text-gray-500">{property?.address}</p>
           </div>
         </div>
       </Link>

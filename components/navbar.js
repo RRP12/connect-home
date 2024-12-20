@@ -8,14 +8,8 @@ import Link from "next/link"
 
 const Navbar = () => {
   return (
-    <AppBar
-      sx={{
-        boxShadow: "none",
-        borderBottom: "1px solid grey",
-      }}
-      position="static"
-    >
-      <Toolbar
+    <div>
+      {/* <Toolbar
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -55,8 +49,8 @@ const Navbar = () => {
           </Link>
           <AuthButtonServer />
         </Box>
-      </Toolbar>
-    </AppBar>
+      </Toolbar> */}
+    </div>
   )
 }
 
