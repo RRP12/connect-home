@@ -1,7 +1,7 @@
 import { createClient } from "../../../utils/supabase/server"
 
 export default async function PropertyPage({ params }) {
-  const { id: propertyID } = params
+  const { id: propertyID } = await params
   const supabase = await createClient()
   let { data: property, error } = await supabase
     .from("properties")

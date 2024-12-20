@@ -7,15 +7,15 @@ import { Suspense } from "react"
 import { TableRowSkeleton } from "./skeletons"
 import Chatbot from "./test/chatbot"
 export default async function Home() {
-  const supabase = await createClient()
+  // const supabase = await createClient()
 
-  const {
-    data: { session },
-  } = await supabase.auth?.getSession()
+  // const {
+  //   data: { session },
+  // } = await supabase.auth?.getSession()
 
-  if (!session) {
-    redirect("/login")
-  }
+  // if (!session) {
+  //   redirect("/login")
+  // }
   return (
     <div className="border-3 border-gray-500 py-6  h-screen w-full sm:w-[90%] m-auto flex flex-row gap-4 my-4  sm:flex-col mb-7   ">
       <div className="flex gap-4 h-screen  flex-col  w-full sm:w-full sm:flex-row justify-between flex-1">
