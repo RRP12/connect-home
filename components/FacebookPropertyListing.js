@@ -5,6 +5,8 @@ import img1 from "../assets/image1.jpg"
 import img2 from "../assets/image2.jpg"
 import img3 from "../assets/image3.jpg"
 import img4 from "../assets/img4.jpg"
+import share from "../assets/share.png"
+import bookmark from "../assets/bookmark.png"
 import Link from "next/link"
 
 const images = [img4, img1, img2, img3, img4, img2]
@@ -92,9 +94,9 @@ const PropertyCard = ({ property }) => {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-xl bg-white rounded-lg shadow border border-cyan-100 p-2">
+    <div className="flex flex-col gap-2 max-w-xl  bg-white rounded-lg shadow border border-cyan-100 p-2">
       <Link href={`/property/${property?.id}`}>
-        <div className="p-4">
+        <div>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-full overflow-hidden">
               <Image
@@ -104,30 +106,37 @@ const PropertyCard = ({ property }) => {
               />
             </div>
             <div className="flex-1">
-              <h3 className="subpixel-antialiased indent-1 text-gray-800 font-medium text-lg font-bold uppercase ">
+              <h3 className="subpixel-antialiased indent-1 text-[#757575] text-lg font-bold uppercase ">
                 {property?.property_title}
               </h3>
               <p className="text-xs text-gray-500">
                 {formatPostedDate(property?.created_at)}
               </p>
             </div>
-            <button className="text-gray-400">...</button>
+            <div className="flex gap-3">
+              <Image src={bookmark} alt="share" />
+              <Image src={share} alt="share" />
+            </div>
+            {/* <button className="text-gray-400">...</button> */}
           </div>
 
           <div className="mt-3 space-y-1 text-sm">
-            <h4>{formattedPropertyData?.title}</h4>
+            {/* <h4>{formattedPropertyData?.title}</h4>
             <p>🌟🎄 Festive season offers 🤝💫</p>
             <p>*SINGLE OCCUPANCY* #male</p>
             <p className="text-blue-600">
               #LUXURIOUS #BEAUTIFUL #FULLYFURNISHED #BI... अधिक पढ़ें
-            </p>
+            </p> */}
 
-            <div className="text-gray-500 flex items-center gap-3 ">
-              <p className="font-bold text-lg">Price:</p>
-              {property?.price}
+            <div className="text-gray-500 flex flex-col items-start gap-3 ">
+              <p className=" text-gray-500 ">
+                <span className="font-semibold">Price</span>: {property?.price}
+              </p>
+              <p className="text-gray-500">
+                <span className="font-semibold">Address</span> :{" "}
+                {property?.address}
+              </p>
             </div>
-            <span className="text-gray-500  font-bold text-lg">Address:</span>
-            <p className="text-gray-500">{property?.address}</p>
           </div>
         </div>
       </Link>
@@ -226,7 +235,7 @@ const PropertyCard = ({ property }) => {
         </div>
       )}
 
-      <div className="p-2 border-t mt-1">
+      {/* <div className="p-2 border-t mt-1">
         <div className="grid grid-cols-4 gap-1">
           {["like", "comment", "share", "review"].map((text) => (
             <button
@@ -237,7 +246,7 @@ const PropertyCard = ({ property }) => {
             </button>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

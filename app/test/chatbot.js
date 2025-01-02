@@ -192,29 +192,26 @@ import styled from "styled-components"
 import { ChatMistralAI } from "@langchain/mistralai"
 import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { PromptTemplate } from "@langchain/core/prompts"
+import MapInterface from "../../components/maps/mapsSuggestions"
+
 import {
   RunnablePassthrough,
   RunnableSequence,
 } from "@langchain/core/runnables"
+
+import { motion } from "motion/react"
 import { MistralAIEmbeddings } from "@langchain/mistralai"
-import { ChatPromptTemplate } from "@langchain/core/prompts"
-import { Document } from "@langchain/core/documents"
+
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 
 import { createClient } from "../../utils/supabase/client"
-import { StringOutputParser } from "@langchain/core/output_parsers"
+import {
+  JsonOutputParser,
+  StringOutputParser,
+} from "@langchain/core/output_parsers"
 
-import React, {
-  useState,
-  Suspense,
-  useEffect,
-  use,
-  useRef,
-  useLayoutEffect,
-} from "react"
-import { useChatContext } from "../../components/mainContext"
-import useEnhancedEffect from "@mui/material/utils/useEnhancedEffect"
+import React, { useState, useEffect, useRef } from "react"
 
 const llm = new ChatMistralAI({
   model: "mistral-large-latest",
@@ -253,55 +250,17 @@ function formatPropertyList(properties) {
 
 function Chatbot() {
   const [titles, setTitles] = useState([])
-  const [location, setLocation] = useState({ latitude: null, longitude: null })
-  const [error, setError] = useState(null)
+  const [recommendedProperties, setrecommendedProperties] = useState(null)
+  const [responseMessage, setResponseMessage] = useState(null)
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [convHistory, setconvHistory] = useState([])
+  const [isFullScreen, setIsFullScreen] = useState(false)
 
-  let supabase = createClient()
+  console.log("recommendedProperties", recommendedProperties)
 
-  function extractPropertyTitles(data) {
-    console.log("data", data)
-
-    const propertyTitles = []
-    const regex = /Property Title: (.+)/g
-
-    data?.forEach((item) => {
-      const matches = item.pageContent.matchAll(regex)
-      for (const match of matches) {
-        const title = match[1].trim()
-
-        console.log("title", title)
-
-        if (title.toLowerCase() !== "null") {
-          propertyTitles?.push(title)
-        }
-      }
-    })
-
-    setTitles(propertyTitles)
-    console.log("propertyTitles", propertyTitles)
-    console.log("titles", titles)
-  }
-
-  const getCoordinates = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          })
-          setError(null)
-        },
-        (err) => {
-          setError(err.message)
-        }
-      )
-    } else {
-      setError("Geolocation is not supported by this browser.")
-    }
-  }
   useEffect(() => {
-    getCoordinates()
+    // getCoordinates()
     //upload data to supbase
     let supabase = createClient()
 
@@ -335,17 +294,6 @@ function Chatbot() {
 
         console.log("output", output)
 
-        // await SupabaseVectorStore.fromDocuments(
-        //   output,
-        //   new MistralAIEmbeddings({
-        //     model: "mistral-embed",
-        //     apiKey: "1PsW8N6PpMIXcavicB0PjwOm8JIkk51v",
-        //   }),
-        //   {
-        //     client,
-        //     tableName: "documents",
-        //   }
-        // )
         console.log("success")
       } catch (err) {
         console.log("err", err)
@@ -356,11 +304,31 @@ function Chatbot() {
     }
     uploaddata()
   }, [])
-  const [responseMessage, setResponseMessage] = useState(null)
-  const [input, setInput] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [convHistory, setconvHistory] = useState([])
+  useEffect(() => {
+    const extractPropertyNames = async () => {
+      try {
+        const prompt = PromptTemplate.fromTemplate(
+          "Respond with a valid JSON object with no special character only json containing  arry of objects two fields: 'name'  ,'location'  and 'address'  {message}"
+        )
+        const parser = new JsonOutputParser()
+        const chainA = prompt.pipe(llm).pipe(parser)
 
+        console.log("responseMessage before ", responseMessage)
+
+        // The result is an object with a `text` property.
+
+        const chain = await chainA.invoke({ message: responseMessage })
+        setrecommendedProperties(chain)
+      } catch (e) {
+        console.log("error", e)
+      }
+    }
+    extractPropertyNames()
+  }, [responseMessage])
+
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen)
+  }
   async function getResponse(input) {
     console.log("input", input)
 
@@ -389,12 +357,21 @@ function Chatbot() {
 
       const answerPrompt = PromptTemplate.fromTemplate(
         `You are a helpful and enthusiastic Property agent support bot who can answer a given question about properties based on the context provided and Try to find the answer in the context. If the answer is not given in the context, find the answer in the conversation history ,
-        If you really don't know the answer, say "I'm sorry, I don't know the answer to that." And direct the questioner to email help@scrimba.com. Don't try to make up an answer and always if the user want you to show properties in show the deatils in ters of the  list and  Always speak as if you were chatting to a friend .
+
+        please remove the special characters like "**" and others  and format the stucture of the format properly ,
+        If you really don't know the answer, say "I'm sorry, I don't know the answer to that.
+        Don't try to make up an answer and always if the user want you to show properties in show the deatils in the
+          form of  list of properties 
+        
+        and  Always speak as if you were
+         chatting to a friend and try to make it sound like a human .
         context: {context}
         conversation history: {conv_history}
         question: {question}
         answer: `
       )
+      // list but don't show the location but keep it in the response
+      //  or contact info
 
       const standaloneQuestionChain = standaloneQuestionPrompt
         .pipe(llm)
@@ -409,6 +386,7 @@ function Chatbot() {
         retriever,
         (docs) => {
           extractPropertyTitles(docs)
+          console.log("docs", docs)
 
           return docs.map((doc) => doc.pageContent).join("\n\n")
         },
@@ -442,6 +420,7 @@ function Chatbot() {
   }
 
   const handleSubmit = async () => {
+    setIsFullScreen(true)
     if (!input.trim()) return
 
     setLoading(true)
@@ -463,53 +442,181 @@ function Chatbot() {
     }
   }
 
-  const messagesEndRef = useRef(null)
-  return (
-    <div className="border border-1 rounded flex flex-col justify-end h-[100%]  overflow-hidden ">
-      <div className=" mb-12 overflow-y-scroll">
-        <div className="p-7  overflow-y-scroll">
-          <ul>
-            {convHistory.map((msg, index) => (
-              <li key={index}>
-                <div
-                  className={`py-1 ${
-                    index % 2 === 0 ? "  text-right" : "bg-zinc-200 "
-                  }`}
-                  sender={msg.sender}
-                >
-                  <p
-                    className={`py-2 px-4 ${
-                      index % 2 === 0 ? "" : "text-left"
-                    }`}
-                  >
-                    {msg.message}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div ref={messagesEndRef} />
-      </div>
+  function extractPropertyTitles(data) {
+    console.log("data", data)
 
-      <div className="w-full border border-1  flex gap-5 rounded justify-between ">
-        <input
-          className=" w-[70%]  p-3 outline-none"
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-        />
-        <button
-          className="  h-full bg-blue-500  text-white py-3 px-3"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "Send"}
-        </button>
+    const propertyTitles = []
+    const regex = /Property Title: (.+)/g
+
+    data?.forEach((item) => {
+      const matches = item.pageContent.matchAll(regex)
+      for (const match of matches) {
+        const title = match[1].trim()
+
+        console.log("title", title)
+
+        if (title.toLowerCase() !== "null") {
+          propertyTitles?.push(title)
+        }
+      }
+    })
+
+    setTitles(propertyTitles)
+    console.log("propertyTitles", propertyTitles)
+    console.log("titles", titles)
+  }
+  const messagesEndRef = useRef(null)
+
+  const cleanedResponse = (r) => r.replace(/\*\*/g, "")
+  return (
+    <motion.div
+      className="modal"
+      layout
+      initial={{ width: "50%", height: "100%" }}
+      animate={{
+        width: isFullScreen ? "100%" : "50%",
+        height: isFullScreen ? "100%" : "100%",
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        duration: 0.8,
+      }}
+    >
+      <div className=" relative border rounded px-4 py-4 w-[100%]  justify-between h-[80%]  flex-col   hidden    lg:flex">
+        {isFullScreen && (
+          <button
+            onClick={() => setIsFullScreen(false)}
+            className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded"
+          >
+            Close
+          </button>
+        )}
+
+        <div className={`${convHistory.length !== 0 ? "hidden" : "block"}`}>
+          <div className="flex flex-col">
+            <p>Results for</p>
+            <div className="flex gap-2 items-center align-center justify-start">
+              <div className="rounded-xl bg-blue-500 w-2 h-2"></div>
+              <p className="text-gray-400 font-semibold">
+                <span className="rounded-xl bg-blue-500 w-5 h-5"></span>
+                Kadam Wadi, Marol, Andheri East, Mumbai
+              </p>
+            </div>
+          </div>
+          <div className="mb-6">
+            <h1 className=" my-4 font-extralight text-gray-600">
+              AI Suggestions
+            </h1>
+
+            <div className="divide-y divide-dashed w-26 space-y-1">
+              <div>
+                <p className="text-gray-400">Pg in Andheri</p>
+              </div>
+              <p className="text-gray-400">Pg in marol</p>
+              <p className="text-gray-400">Pg in bandra</p>
+            </div>
+          </div>
+        </div>
+
+        <div className=" rounded flex flex-col justify-end h-[100%]  overflow-hidden ">
+          <MapInterface />
+          <div className="mb-12 border overflow-scroll h-full">
+            <ul>
+              {convHistory.map((msg, index) => (
+                <li key={index}>
+                  <div className={`py-2 w-auto px-5 `} sender={msg}>
+                    <>
+                      {index % 2 === 0 ? (
+                        <div>
+                          <p className="  text-wrap text-right ">
+                            {cleanedResponse(msg?.message)}
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <pre className=" w-full rounded-md text-wrap text-left font-sans capitalize from-neutral-900 bg-gray-100 p-4">
+                            {cleanedResponse(msg?.message)}
+                          </pre>
+                        </>
+                      )}
+                    </>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div ref={messagesEndRef} />
+          </div>
+
+          <RecommendedProperties
+            recommendedProperties={recommendedProperties}
+          />
+          <div className=" border border-1 justify-between  flex rounded mx-3 my-1 py-2 px-2 ">
+            <input
+              className=" w-[70%]  p-3 outline-none mx-3"
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message..."
+            />
+            <button
+              className=" h-full bg-gray-300 rounded-3xl text-white py-2 px-5"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Loading..." : "Send"}
+            </button>
+
+            <button onClick={toggleFullScreen}>Mapview</button>
+            {convHistory.length > 0 && (
+              <button
+                onClick={() => {
+                  setconvHistory([])
+
+                  setrecommendedProperties([])
+                }}
+                className="absolute  left -0 top-5 bg-blue-500 text-white px-3 py-1 rounded"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* <MapInterface /> */}
+        </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 export default Chatbot
+
+const RecommendedProperties = ({ recommendedProperties }) => {
+  return (
+    <div>
+      {recommendedProperties ? (
+        <ul>
+          {recommendedProperties?.map((property, index) => (
+            <motion.li
+              key={index}
+              initial={{ x: -100, opacity: 0 }} // Slide in from the left with opacity 0
+              animate={{ x: 0, opacity: 1 }} // Slide to the original position with full opacity
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                delay: index * 0.2, // Staggered delay for each property
+              }}
+            >
+              <strong>{property.name}</strong>: {property.address}
+              {property.area}
+            </motion.li>
+          ))}
+        </ul>
+      ) : (
+        <p>No properties found.</p>
+      )}
+    </div>
+  )
+}
