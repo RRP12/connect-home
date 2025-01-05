@@ -212,6 +212,8 @@ import {
 } from "@langchain/core/output_parsers"
 
 import React, { useState, useEffect, useRef } from "react"
+import Image from "next/image"
+import { ArrowBigLeftIcon } from "lucide-react"
 
 const llm = new ChatMistralAI({
   model: "mistral-large-latest",
@@ -250,19 +252,40 @@ function formatPropertyList(properties) {
 
 function Chatbot() {
   const [titles, setTitles] = useState([])
-  const [recommendedProperties, setrecommendedProperties] = useState(null)
+  const [recommendedProperties, setrecommendedProperties] = useState([])
   const [responseMessage, setResponseMessage] = useState(null)
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [convHistory, setconvHistory] = useState([])
   const [isFullScreen, setIsFullScreen] = useState(false)
+  const [mapView, setmapView] = useState(false)
+  const [recommenedByAi, setrecommenedByAi] = useState([])
+  let supabase = createClient()
+  const inputRef = useRef(null)
 
-  console.log("recommendedProperties", recommendedProperties)
+  console.log("mainrecommenedByAi", recommenedByAi)
+
+  useEffect(() => {
+    let data = recommendedProperties
+      ?.filter((p) => p?.name !== "Not Available")
+      .map(async (p) => {
+        const { data: properties, error } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("property_title", p.name)
+        if (error) {
+          console.log("error", error)
+        } else {
+          setrecommenedByAi((prev) => [...prev, ...properties])
+        }
+      })
+
+    console.log("found", data)
+  }, [recommendedProperties, supabase])
 
   useEffect(() => {
     // getCoordinates()
     //upload data to supbase
-    let supabase = createClient()
 
     async function uploaddata() {
       let { data: properties, error } = await supabase
@@ -303,7 +326,7 @@ function Chatbot() {
       }
     }
     uploaddata()
-  }, [])
+  }, [supabase])
   useEffect(() => {
     const extractPropertyNames = async () => {
       try {
@@ -328,6 +351,7 @@ function Chatbot() {
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen)
+    setmapView((prev) => !prev)
   }
   async function getResponse(input) {
     console.log("input", input)
@@ -462,8 +486,6 @@ function Chatbot() {
     })
 
     setTitles(propertyTitles)
-    console.log("propertyTitles", propertyTitles)
-    console.log("titles", titles)
   }
   const messagesEndRef = useRef(null)
 
@@ -484,7 +506,7 @@ function Chatbot() {
         duration: 0.8,
       }}
     >
-      <div className=" relative border rounded px-4 py-4 w-[100%]  justify-between h-[80%]  flex-col   hidden    lg:flex">
+      <div className=" relative border rounded px-4 py-4 w-[100%]  justify-between h-[86%]  flex-col   hidden    lg:flex">
         {isFullScreen && (
           <button
             onClick={() => setIsFullScreen(false)}
@@ -494,7 +516,11 @@ function Chatbot() {
           </button>
         )}
 
-        <div className={`${convHistory.length !== 0 ? "hidden" : "block"}`}>
+        <div
+          className={`${convHistory.length !== 0 ? "hidden" : "block"} ${
+            mapView ? "hidden" : "block"
+          } `}
+        >
           <div className="flex flex-col">
             <p>Results for</p>
             <div className="flex gap-2 items-center align-center justify-start">
@@ -521,32 +547,41 @@ function Chatbot() {
         </div>
 
         <div className=" rounded flex flex-col justify-end h-[100%]  overflow-hidden ">
-          <MapInterface />
-          <div className="mb-12 border overflow-scroll h-full">
-            <ul>
-              {convHistory.map((msg, index) => (
-                <li key={index}>
-                  <div className={`py-2 w-auto px-5 `} sender={msg}>
-                    <>
-                      {index % 2 === 0 ? (
-                        <div>
-                          <p className="  text-wrap text-right ">
-                            {cleanedResponse(msg?.message)}
-                          </p>
-                        </div>
-                      ) : (
-                        <>
-                          <pre className=" w-full rounded-md text-wrap text-left font-sans capitalize from-neutral-900 bg-gray-100 p-4">
-                            {cleanedResponse(msg?.message)}
-                          </pre>
-                        </>
-                      )}
-                    </>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div ref={messagesEndRef} />
+          <div className="flex border overflow-scroll">
+            <div
+              className={`mb-12 ${
+                mapView ? "w-[50%]" : "w-[100%]"
+              }   h-full flex`}
+            >
+              <ul className="w-full">
+                {convHistory.map((msg, index) => (
+                  <li key={index}>
+                    <div className={`py-2 w-auto px-5 `} sender={msg}>
+                      <>
+                        {index % 2 === 0 ? (
+                          <div>
+                            <p className="  text-wrap text-right ">
+                              {cleanedResponse(msg?.message)}
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <pre className=" w-full rounded-md text-wrap text-left font-sans capitalize from-neutral-900 bg-gray-100 p-4">
+                              {cleanedResponse(msg?.message)}
+                            </pre>
+                          </>
+                        )}
+                      </>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div ref={messagesEndRef} />
+            </div>
+            <div className={` ${mapView ? "block" : "hidden"} w-full`}>
+              <MapInterface recommenedByAi={recommenedByAi} />
+            </div>
           </div>
 
           <RecommendedProperties
@@ -554,21 +589,31 @@ function Chatbot() {
           />
           <div className=" border border-1 justify-between  flex rounded mx-3 my-1 py-2 px-2 ">
             <input
+              ref={inputRef}
               className=" w-[70%]  p-3 outline-none mx-3"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
             />
-            <button
-              className=" h-full bg-gray-300 rounded-3xl text-white py-2 px-5"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Loading..." : "Send"}
-            </button>
+            <div className="flex gap-4">
+              {inputRef.current?.value && (
+                <button
+                  className={` h-full bg-grey-300 rounded-2xl bg-slate-400 text-white py-2 px-5`}
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "Send"}
+                </button>
+              )}
 
-            <button onClick={toggleFullScreen}>Mapview</button>
+              <button
+                className={`${"bg-gray-600"} h-full rounded-2xl text-white py-2 px-5`}
+                onClick={toggleFullScreen}
+              >
+                {!mapView ? "Mapview" : "Exit"}
+              </button>
+            </div>
             {convHistory.length > 0 && (
               <button
                 onClick={() => {

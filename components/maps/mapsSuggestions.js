@@ -35,7 +35,9 @@ const MAP_BOUNDS = {
   maxLng: 72.85,
 }
 
-const MapInterface = () => {
+const MapInterface = ({ recommenedByAi }) => {
+  console.log("recommenedByAi", recommenedByAi)
+
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -83,7 +85,33 @@ const MapInterface = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         <div className="space-y-3">
-          {filteredLocations.map((location) => (
+          {recommenedByAi.map((p) => (
+            <div
+              key={p?.property_title}
+              className="p-3 border rounded cursor-pointer text-green-300 transition-all hover:bg-gray-100"
+            >
+              {p?.property_title}
+            </div>
+          ))}
+          {/* {recommenedByAi?.map((location) => (
+            <div
+              key={location.id}
+              className={`p-3 border rounded cursor-pointer transition-all hover:bg-gray-100 ${
+                selectedLocation?.id === location.id ? "bg-blue-100" : ""
+              }`}
+              onClick={() => setSelectedLocation(location)}
+            >
+              <h3 className="font-semibold">{location.property_title}</h3>
+              <p className="text-sm text-gray-600">{location.description}</p>
+              {selectedLocation?.id === location.id && (
+                <div className="mt-2 text-sm text-blue-600">
+                  {calculateDistance(userLocation, location.coordinates)} km
+                  away
+                </div>
+              )}
+            </div>
+          ))} */}
+          {/* {filteredLocations.map((location) => (
             <div
               key={location.id}
               className={`p-3 border rounded cursor-pointer transition-all hover:bg-gray-100 ${
@@ -100,7 +128,7 @@ const MapInterface = () => {
                 </div>
               )}
             </div>
-          ))}
+          ))} */}
         </div>
       </div>
 

@@ -3,10 +3,11 @@ import React from "react"
 import serchicon from "../assets/serchicon.svg"
 import burgericon from "../assets/burger.svg"
 import BarndLogo from "../assets/brandlogo.jpg"
+import notification from "../assets/notification.svg"
 import Image from "next/image"
 export default function SearchBar() {
   return (
-    <div className="flex justify-between items-center h-full  border border-green-500 w-full">
+    <div className="flex justify-between items-center h-full w-full">
       <Image src={BarndLogo} alt="BarndLogo" width={140} />
       <div className="flex gap-4">
         <div className="bg-[#fef7ff] rounded-2xl flex h-12  justify-between">
@@ -27,6 +28,8 @@ export default function SearchBar() {
         <div className="bg-red-400 h-12 flex items-center justify-center p-2 rounded-xl">
           <p className="text-white">Post Property</p>
         </div>
+
+        <Image src={notification} alt="" />
       </div>
     </div>
   )
