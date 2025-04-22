@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
         <ChatProvider>
           <ErrorBoundary>
             <main
-              className={`${inter.className} flex h-[100%] flex-col  overflow-hidden  w-scren p-2 m-2  md:px-12 md:py-3 `}
+              className={`${inter.className} flex  h-[100%] flex-col  overflow-hidden  w-scren p-2 m-2  md:px-12 md:py-3 `}
             >
               <SearchBar />
               {children}

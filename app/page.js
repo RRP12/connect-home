@@ -18,13 +18,23 @@ export default async function Home() {
   //   redirect("/login")
   // }
   return (
-    <div className="border-3 border-gray-500 flex-wrap h-screen w-[100%] m-auto flex flex-row gap-4 my-4 mb-7 justify-between">
-      <Chatbot />
-
-      <div className="overflow-auto flex-1  md:w-screen h-[80%] sm:h-[100%] sm:w-[100%] scrollbar scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <Suspense fallback={<TableRowSkeleton />}>
-          <PropertyList />
-        </Suspense>
+    <div className="border-3 border-gray-500 h-screen w-full m-auto flex flex-col gap-4 my-4 mb-7">
+      <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+        {/* Hide Chatbot on mobile, show on lg+ */}
+        <div className="hidden lg:flex flex-1 min-h-0 max-h-[80vh]">
+          <Chatbot />
+        </div>
+        <div className="flex-1 min-h-0 overflow-auto scrollbar scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <Suspense fallback={<TableRowSkeleton />}>
+            <PropertyList
+              maxProperties={
+                typeof window !== "undefined" && window.innerWidth < 768
+                  ? 5
+                  : 10
+              }
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   )

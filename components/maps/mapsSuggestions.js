@@ -141,7 +141,6 @@ const MapInterface = ({ recommenedByAi }) => {
             preserveAspectRatio="none"
             style={{ background: "#f0f0f0" }}
           >
-            {/* Background Grid */}
             <defs>
               <pattern
                 id="grid"

@@ -1,192 +1,3 @@
-// "use client"
-
-// import React, { useState, useEffect, Suspense } from "react"
-
-// import { useChatContext } from "../../components/mainContext"
-// // A dummy async function simulating API call to fetch the chatbot response
-
-// //server actin changes
-
-// import { ChatMistralAI } from "@langchain/mistralai"
-// import { HumanMessage, SystemMessage } from "@langchain/core/messages"
-// import { PromptTemplate } from "@langchain/core/prompts"
-
-// import {
-//   RunnablePassthrough,
-//   RunnableSequence,
-// } from "@langchain/core/runnables"
-// import { MistralAIEmbeddings } from "@langchain/mistralai"
-// import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
-// import { ChatPromptTemplate } from "@langchain/core/prompts"
-// import { Document } from "@langchain/core/documents"
-// import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
-
-// import { createClient } from "../../utils/supabase/client"
-// import { StringOutputParser } from "@langchain/core/output_parsers"
-
-// const llm = new ChatMistralAI({
-//   model: "mistral-large-latest",
-//   temperature: 0,
-//   maxRetries: 2,
-//   apiKey: "1PsW8N6PpMIXcavicB0PjwOm8JIkk51v",
-//   // other params...
-// })
-
-// function formatConvHistory(messages) {
-//   return messages
-//     .map((message, i) => {
-//       if (i % 2 === 0) {
-//         return `Human: ${message}`
-//       } else {
-//         return `AI: ${message}`
-//       }
-//     })
-//     .join("\n")
-// }
-
-// function Chatbot() {
-//   const [responseMessage, setResponseMessage] = useState(null)
-//   const [input, setinput] = useState("")
-//   const { convHistory, setconvHistory } = useChatContext()
-
-//   console.log("convHistory", convHistory)
-
-//   async function getResponse(input) {
-//     console.log("input", input)
-
-//     try {
-//       let client = createClient()
-//       // const res = await fetch(`http://localhost:3000/api/readTextFile`)
-//       // const text = await res.text()
-
-//       // const splitter = new RecursiveCharacterTextSplitter({
-//       //   chunkSize: 500,
-//       //   separators: ["\n\n", "\n", " ", ""],
-//       //   chunkOverlap: 50,
-//       // })
-
-//       //retriver
-
-//       const embeddings = new MistralAIEmbeddings({
-//         model: "mistral-embed", // Default value
-//         apiKey: "1PsW8N6PpMIXcavicB0PjwOm8JIkk51v",
-//       })
-//       const vectorStore = new SupabaseVectorStore(embeddings, {
-//         client,
-//         tableName: "documents",
-//         queryName: "match_documents",
-//       })
-
-//       const retriever = vectorStore.asRetriever()
-
-//       // A string holding the phrasing of the prompt
-//       const standaloneQuestionTemplate = `Given some conversation history (if any) and a question, convert the question to a standalone question.
-//       conversation history: {conv_history}
-//       question: {question}
-//       standalone question:`
-
-//       // A prompt created using PromptTemplate and the fromTemplate method
-//       const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
-//         standaloneQuestionTemplate
-//       )
-//       const answerTemplate = `You are a helpful and enthusiastic support bot who can answer a given question about Scrimba based on the context provided and the conversation history. Try to find the answer in the context. If the answer is not given in the context, find the answer in the conversation history if possible. If you really don't know the answer, say "I'm sorry, I don't know the answer to that." And direct the questioner to email help@scrimba.com. Don't try to make up an answer. Always speak as if you were chatting to a friend.
-//       context: {context}
-//       conversation history: {conv_history}
-//       question: {question}
-//       answer: `
-
-//       let answerPrompt = PromptTemplate.fromTemplate(answerTemplate)
-//       // Take the standaloneQuestionPrompt and PIPE the model
-//       const standaloneQuestionChain = standaloneQuestionPrompt
-//         .pipe(llm)
-//         .pipe(new StringOutputParser())
-//       function combineDocuments(docs) {
-//         return docs.map((doc) => doc.pageContent).join("\n\n")
-//       }
-//       const retrieverChain = RunnableSequence.from([
-//         (prevResult) => prevResult.standalone_question,
-//         retriever,
-//         combineDocuments,
-//       ])
-
-//       const answerChain = answerPrompt.pipe(llm).pipe(new StringOutputParser())
-//       const chain = RunnableSequence.from([
-//         {
-//           standalone_question: standaloneQuestionChain,
-//           original_input: new RunnablePassthrough(),
-//         },
-//         {
-//           context: retrieverChain,
-//           question: ({ original_input }) => {
-//             return original_input.question
-//           },
-//           conv_history: ({ original_input }) => original_input.conv_history,
-//         },
-//         answerChain,
-//       ])
-
-//       const response = await chain.invoke({
-//         question: input,
-//         conv_history: formatConvHistory(convHistory),
-//       })
-
-//       return response
-//     } catch (e) {
-//       console.log("error ", e)
-//     }
-//   }
-//   console.log("convHistory", convHistory)
-
-//   async function handelsubmit() {
-//     const fetchData = async () => {
-//       const response = await getResponse(input)
-//       setResponseMessage(response)
-
-//       console.log("response", response)
-
-//       if (responseMessage) {
-//         setconvHistory((prev) => [...prev, input, responseMessage])
-//       }
-//     }
-
-//     fetchData()
-//   }
-//   function formatConvHistory(messages) {
-//     return messages
-//       .map((message, i) => {
-//         if (i % 2 === 0) {
-//           return `Human: ${message}`
-//         } else {
-//           return `AI: ${message}`
-//         }
-//       })
-//       .join("\n")
-//   }
-
-//   return (
-//     <div>
-//       <Suspense fallback={<h1>Loading...</h1>}>
-//         <h1>{responseMessage || "...loading"}</h1>
-//       </Suspense>
-
-//       <input
-//         style={{ outline: "blue", border: "1px solid red" }}
-//         onChange={(e) => setinput(e.target.value)}
-//         type="text"
-//       />
-//       <button
-//         onClick={() => {
-//           handelsubmit()
-//         }}
-//       >
-//         Get Data
-//       </button>
-//     </div>
-//   )
-// }
-
-// export default Chatbot
-
 "use client"
 import styled from "styled-components"
 import { ChatMistralAI } from "@langchain/mistralai"
@@ -257,13 +68,13 @@ function Chatbot() {
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [convHistory, setconvHistory] = useState([])
+  const [mapView, setMapView] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
-  const [mapView, setmapView] = useState(false)
   const [recommenedByAi, setrecommenedByAi] = useState([])
   let supabase = createClient()
   const inputRef = useRef(null)
 
-  console.log("mainrecommenedByAi", recommenedByAi)
+  console.log("mapView", mapView)
 
   useEffect(() => {
     let data = recommendedProperties
@@ -349,10 +160,14 @@ function Chatbot() {
     extractPropertyNames()
   }, [responseMessage])
 
+  const toggleMapView = () => {
+    setMapView(!mapView)
+  }
+
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen)
-    setmapView((prev) => !prev)
   }
+
   async function getResponse(input) {
     console.log("input", input)
 
@@ -444,7 +259,8 @@ function Chatbot() {
   }
 
   const handleSubmit = async () => {
-    setIsFullScreen(true)
+    setrecommenedByAi([])
+    // setmapView(true)
     if (!input.trim()) return
 
     setLoading(true)
@@ -494,9 +310,9 @@ function Chatbot() {
     <motion.div
       className="modal"
       layout
-      initial={{ width: "50%", height: "100%" }}
+      initial={{ width: "100%", height: "100%" }}
       animate={{
-        width: isFullScreen ? "100%" : "50%",
+        width: isFullScreen ? "100%" : "100%",
         height: isFullScreen ? "100%" : "100%",
       }}
       transition={{
@@ -506,129 +322,77 @@ function Chatbot() {
         duration: 0.8,
       }}
     >
-      <div className=" relative border rounded px-4 py-4 w-[100%]  justify-between h-[86%]  flex-col   hidden    lg:flex">
-        {isFullScreen && (
-          <button
-            onClick={() => setIsFullScreen(false)}
-            className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded"
-          >
-            Close
-          </button>
-        )}
-
-        <div
-          className={`${convHistory.length !== 0 ? "hidden" : "block"} ${
-            mapView ? "hidden" : "block"
-          } `}
-        >
-          <div className="flex flex-col">
-            <p>Results for</p>
-            <div className="flex gap-2 items-center align-center justify-start">
-              <div className="rounded-xl bg-blue-500 w-2 h-2"></div>
-              <p className="text-gray-400 font-semibold">
-                <span className="rounded-xl bg-blue-500 w-5 h-5"></span>
-                Kadam Wadi, Marol, Andheri East, Mumbai
-              </p>
-            </div>
-          </div>
-          <div className="mb-6">
-            <h1 className=" my-4 font-extralight text-gray-600">
-              AI Suggestions
-            </h1>
-
-            <div className="divide-y divide-dashed w-26 space-y-1">
-              <div>
-                <p className="text-gray-400">Pg in Andheri</p>
-              </div>
-              <p className="text-gray-400">Pg in marol</p>
-              <p className="text-gray-400">Pg in bandra</p>
-            </div>
-          </div>
-        </div>
-
-        <div className=" rounded flex flex-col justify-end h-[100%]  overflow-hidden ">
-          <div className="flex border overflow-scroll">
-            <div
-              className={`mb-12 ${
-                mapView ? "w-[50%]" : "w-[100%]"
-              }   h-full flex`}
-            >
-              <ul className="w-full">
+      <div className="relative border rounded-lg p-4 w-full h-full flex flex-col">
+        <div className="flex-grow overflow-hidden">
+          <div className="flex overflow-y-auto h-full">
+            <div className={`${mapView ? "w-1/2" : "w-full"} h-full`}>
+              <ul className="space-y-2">
                 {convHistory.map((msg, index) => (
                   <li key={index}>
-                    <div className={`py-2 w-auto px-5 `} sender={msg}>
-                      <>
-                        {index % 2 === 0 ? (
-                          <div>
-                            <p className="  text-wrap text-right ">
-                              {cleanedResponse(msg?.message)}
-                            </p>
-                          </div>
-                        ) : (
-                          <>
-                            <pre className=" w-full rounded-md text-wrap text-left font-sans capitalize from-neutral-900 bg-gray-100 p-4">
-                              {cleanedResponse(msg?.message)}
-                            </pre>
-                          </>
-                        )}
-                      </>
+                    <div
+                      className={`py-2 px-4 ${
+                        index % 2 === 0 ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {index % 2 === 0 ? (
+                        <p className="text-wrap text-gray-800">
+                          {cleanedResponse(msg?.message)}
+                        </p>
+                      ) : (
+                        <pre className="w-full rounded-md text-wrap font-sans bg-gray-100 p-4 text-gray-700">
+                          {cleanedResponse(msg?.message)}
+                        </pre>
+                      )}
                     </div>
                   </li>
                 ))}
               </ul>
-
-              <div ref={messagesEndRef} />
             </div>
-            <div className={` ${mapView ? "block" : "hidden"} w-full`}>
-              <MapInterface recommenedByAi={recommenedByAi} />
-            </div>
-          </div>
-
-          <RecommendedProperties
-            recommendedProperties={recommendedProperties}
-          />
-          <div className=" border border-1 justify-between  flex rounded mx-3 my-1 py-2 px-2 ">
-            <input
-              ref={inputRef}
-              className=" w-[70%]  p-3 outline-none mx-3"
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-            />
-            <div className="flex gap-4">
-              {inputRef.current?.value && (
-                <button
-                  className={` h-full bg-grey-300 rounded-2xl bg-slate-400 text-white py-2 px-5`}
-                  onClick={handleSubmit}
-                  disabled={loading}
-                >
-                  {loading ? "Loading..." : "Send"}
-                </button>
-              )}
-
-              <button
-                className={`${"bg-gray-600"} h-full rounded-2xl text-white py-2 px-5`}
-                onClick={toggleFullScreen}
-              >
-                {!mapView ? "Mapview" : "Exit"}
-              </button>
-            </div>
-            {convHistory.length > 0 && (
-              <button
-                onClick={() => {
-                  setconvHistory([])
-
-                  setrecommendedProperties([])
-                }}
-                className="absolute  left -0 top-5 bg-blue-500 text-white px-3 py-1 rounded"
-              >
-                Clear
-              </button>
+            {mapView && (
+              <div className="w-1/2 h-full">
+                <MapInterface recommenedByAi={recommenedByAi} />
+              </div>
             )}
           </div>
+        </div>
 
-          {/* <MapInterface /> */}
+        <div className="flex items-center border-t border-gray-300 pt-2 mt-2">
+          <input
+            ref={inputRef}
+            className="flex-grow p-3 border rounded-md outline-none"
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+          />
+          <div className="flex items-center gap-4 ml-4">
+            {input && (
+              <button
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "Loading..." : "Send"}
+              </button>
+            )}
+            <button
+              className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
+              onClick={toggleMapView}
+            >
+              {mapView ? "Exit Map View" : "Map View"}
+            </button>
+          </div>
+          {convHistory.length > 0 && (
+            <button
+              onClick={() => {
+                setconvHistory([])
+                setrecommendedProperties([])
+              }}
+              className="ml-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
     </motion.div>
