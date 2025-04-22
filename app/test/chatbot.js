@@ -301,6 +301,7 @@ function Chatbot() {
       }
     })
 
+    //added tyhe fixed ui
     setTitles(propertyTitles)
   }
   const messagesEndRef = useRef(null)
