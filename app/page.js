@@ -26,13 +26,7 @@ export default async function Home() {
         </div>
         <div className="flex-1 min-h-0 overflow-auto scrollbar scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           <Suspense fallback={<TableRowSkeleton />}>
-            <PropertyList
-              maxProperties={
-                typeof window !== "undefined" && window.innerWidth < 768
-                  ? 5
-                  : 10
-              }
-            />
+            <PropertyList maxProperties={10} />
           </Suspense>
         </div>
       </div>
