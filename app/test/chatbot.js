@@ -72,8 +72,6 @@ function Chatbot() {
   let supabase = createClient()
   const inputRef = useRef(null)
 
-  console.log("mapView", mapView)
-
   useEffect(() => {
     let data = recommendedProperties
       ?.filter((p) => p?.name !== "Not Available")
