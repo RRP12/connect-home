@@ -3,7 +3,6 @@ import styled from "styled-components"
 import { ChatMistralAI } from "@langchain/mistralai"
 import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import { PromptTemplate } from "@langchain/core/prompts"
-import MapInterface from "../../components/maps/mapsSuggestions"
 
 import {
   RunnablePassthrough,
@@ -68,7 +67,6 @@ function Chatbot() {
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [convHistory, setconvHistory] = useState([])
-  const [mapView, setMapView] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [recommenedByAi, setrecommenedByAi] = useState([])
   let supabase = createClient()
@@ -159,10 +157,6 @@ function Chatbot() {
     }
     extractPropertyNames()
   }, [responseMessage])
-
-  const toggleMapView = () => {
-    setMapView(!mapView)
-  }
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen)
@@ -260,7 +254,6 @@ function Chatbot() {
 
   const handleSubmit = async () => {
     setrecommenedByAi([])
-    // setmapView(true)
     if (!input.trim()) return
 
     setLoading(true)
@@ -326,7 +319,7 @@ function Chatbot() {
       <div className="relative border rounded-lg p-4 w-full h-full flex flex-col">
         <div className="flex-grow overflow-hidden">
           <div className="flex overflow-y-auto h-full">
-            <div className={`${mapView ? "w-1/2" : "w-full"} h-full`}>
+            <div className="w-full h-full">
               <ul className="space-y-2">
                 {convHistory.map((msg, index) => (
                   <li key={index}>
@@ -349,11 +342,6 @@ function Chatbot() {
                 ))}
               </ul>
             </div>
-            {mapView && (
-              <div className="w-1/2 h-full">
-                <MapInterface recommenedByAi={recommenedByAi} />
-              </div>
-            )}
           </div>
         </div>
 
@@ -376,12 +364,6 @@ function Chatbot() {
                 {loading ? "Loading..." : "Send"}
               </button>
             )}
-            <button
-              className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
-              onClick={toggleMapView}
-            >
-              {mapView ? "Exit Map View" : "Map View"}
-            </button>
           </div>
           {convHistory.length > 0 && (
             <button
