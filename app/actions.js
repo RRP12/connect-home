@@ -21,7 +21,7 @@ const llm = new ChatMistralAI({
   model: "mistral-large-latest",
   temperature: 0,
   maxRetries: 2,
-  apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_TOKEN,
+  apiKey: "KeN2EVC22mnRvrw0JJbo8h5bvyBoZCFs",
   // other params...
 })
 

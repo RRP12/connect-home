@@ -220,7 +220,7 @@ const llm = new ChatMistralAI({
   model: "mistral-large-latest",
   temperature: 0,
   maxRetries: 2,
-  apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_TOKEN,
+  apiKey: "KeN2EVC22mnRvrw0JJbo8h5bvyBoZCFs",
 })
 
 function formatConvHistory(messages) {
@@ -240,9 +240,8 @@ function formatPropertyList(properties) {
   properties.forEach((property) => {
     formattedList += `
 <div style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-  <strong style="font-size: 1.2em;">${
-    property.title || "No Title Available"
-  }</strong><br>
+  <strong style="font-size: 1.2em;">${property.title || "No Title Available"
+      }</strong><br>
   ${property.description || "No Description Available"}<br>
   Location: ${property.location || "Not explicitly available"}
 </div>
@@ -369,7 +368,7 @@ function Chatbot() {
 
       const embeddings = new MistralAIEmbeddings({
         model: "mistral-embed",
-        apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_TOKEN,
+        apiKey: 'KeN2EVC22mnRvrw0JJbo8h5bvyBoZCFs',
       })
 
       const vectorStore = new SupabaseVectorStore(embeddings, {
@@ -472,15 +471,13 @@ function Chatbot() {
             {convHistory.map((msg, index) => (
               <li key={index}>
                 <div
-                  className={`py-1 ${
-                    index % 2 === 0 ? "  text-right" : "bg-zinc-200 "
-                  }`}
+                  className={`py-1 ${index % 2 === 0 ? "  text-right" : "bg-zinc-200 "
+                    }`}
                   sender={msg.sender}
                 >
                   <p
-                    className={`py-2 px-4 ${
-                      index % 2 === 0 ? "" : "text-left"
-                    }`}
+                    className={`py-2 px-4 ${index % 2 === 0 ? "" : "text-left"
+                      }`}
                   >
                     {msg.message}
                   </p>
