@@ -1,363 +1,169 @@
 "use client"
+import { useChat } from '@ai-sdk/react';
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FiSend,
+  FiMessageCircle,
+  FiX,
+  FiHome,
+  FiUser,
+  FiChevronDown
+} from "react-icons/fi";
 
-import { HfInference } from "@huggingface/inference"
-
-import { createClient } from "../../../utils/supabase/client"
-import { useState } from "react"
-import { formatedData } from "../../../utils/aidata"
-const client = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
-
-const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN)
 export default function FloatingMessages() {
-  let supabase = createClient()
-  let [isOpen, setIsOpen] = useState(false)
-  let [input, setInput] = useState("")
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
-  let [queryembiddings, setQueryEmbiddings] = useState(null)
-  let [resposne, setResponse] = useState("")
-  let [loadingResponse, setLoadingResponse] = useState(false)
-  console.log("loading", loading)
-  console.log("error", error)
+  const [isOpen, setIsOpen] = useState(false);
+  const {
+    messages,
+    handleSubmit,
+    status,
+    append,
+    sendMessage,
+    handleInputChange
+  } = useChat({
+    api: '/api/chat',
+    onError: (err) => console.error("Floating Chat Error:", err)
+  });
 
-  const toggleOpen = () => setIsOpen(!isOpen)
-  const modelId = "intfloat/e5-base-v2" // Change to any other model if necessary
-  const hfToken = process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN // Replace with your Hugging Face API token
+  const [localInput, setLocalInput] = useState("");
+  const messagesEndRef = useRef(null);
 
-  const apiUrl = `https://api-inference.huggingface.co/pipeline/feature-extraction/${modelId}`
-  // useEffect(() => {
-  //   async function generateText() {
-  //     const textToGenerate = "The definition of machine learning inference is "
+  // Debug: Log what useChat returns
+  useEffect(() => {
+    console.log("FloatingMessages useChat returns:", { messages, status, hasAppend: !!append, hasSubmit: !!handleSubmit });
+  }, [status]);
 
-  //     const response = await hf.textGeneration({
-  //       inputs: textToGenerate,
-  //       model: "HuggingFaceH4/zephyr-7b-beta",
-  //     })
+  // Robust submit handler that tries all known methods
+  const handleManualSubmit = (e) => {
+    e?.preventDefault();
+    if (!localInput?.trim()) return;
 
-  //     console.log("response", response)
-  //   }
-
-  //   generateText()
-  // }, []) // Empty dependency array to run the effect once
-
-  //create an embidding for an user input
-
-  const createEmbedding = async (inputText) => {
-    const modelId = "intfloat/e5-base-v2"
-    const hfToken = process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN // Replace with your Hugging Face API token
-    const apiUrl = `https://api-inference.huggingface.co/pipeline/feature-extraction/${modelId}`
-
-    try {
-      setLoading(true)
-      setError(null) // Clear any previous error
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${hfToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: [inputText],
-        }),
-      })
-
-      if (!response.ok) throw new Error("Failed to fetch data")
-
-      const data = await response.json()
-
-      return data[0]
-    } catch (err) {
-      setError(err?.message) // Handle errors
-    } finally {
-      setLoading(false) // Stop loading
-    }
-  }
-
-  function handelChange(e) {
-    setInput(e.target.value)
-  }
-
-  async function findNearestMatch(embedding) {
-    if (embedding) {
-      let { data, error } = await supabase.rpc("match_properties", {
-        query_embedding: embedding,
-        match_threshold: 0.5,
-        match_count: 2, // Fetch more matche
-      })
-
-      if (error) console.error(error)
-      else return data
-      if (error) {
-        console.error("Error fetching nearest match_properties:", error)
-      }
-    }
-  }
-  let chatMessages = [
-    {
-      role: "system",
-      content: `You are an enthusiastic property search  expert hwo loves
-       recommending properties to people. You will be given two pieces
-        of information - some context about properties  and a question.
-         Your main job is to formulate a short answer to the question using the
-          provided context. If you are unsure and cannot find the answer in the
-          context, "Sorry, I don't know the answer."  Please do not make up the answer yourself.`,
-    },
-  ]
-
-  async function getChatCompletion(text, query) {
-    const contextString = JSON.stringify(text)
-    // Initialize the system message
-
-    // Add the context about jazz under the stars and the user's question
-    chatMessages.push({
-      role: "user",
-      content: `Content:${contextString} Question:${query}`,
-    })
-
-    console.log("chat mesage ", chatMessages)
-    //working model
-    // model: "microsoft/Phi-3-mini-4k-instruct",
-    // Initiate the API call for chat completion
-    // Qwen/QwQ-32B-Preview
-    const stream = client.chatCompletionStream({
-      model: "microsoft/Phi-3-mini-4k-instruct", // Adjust model if necessary
-      messages: chatMessages,
-      temperature: 0.5,
-      max_tokens: 100,
-      top_p: 0.7,
-    })
-
-    let out = ""
-    let isResponseEmpty = true
-
-    // Streaming the response
-    for await (const chunk of stream) {
-      if (chunk.choices && chunk.choices.length > 0) {
-        const newContent = chunk.choices[0].delta.content
-        out += newContent
-
-        // If the model generates something meaningful, flag it
-        if (newContent.trim()) {
-          isResponseEmpty = false
-        }
-      }
-    }
-
-    // Handle case when no meaningful response is generated
-    if (isResponseEmpty) {
-      console.log("The model couldn't generate a meaningful response.")
-      return "Sorry, I don't know the answer." // Or handle as needed
-    } else {
-      console.log("Generated Response:", out) // Debugging the output
-      return out // Return the generated response
-    }
-  }
-
-  async function main(query) {
-    const embedding = await createEmbedding(query) // Step 1: Generate query embedding
-    const bestMatch = await findNearestMatch(embedding) // Step 2: Find the best matching document
-
-    console.log("bestMatch", bestMatch)
-
-    if (bestMatch) {
-      try {
-        const response = await getChatCompletion(bestMatch, query)
-        if (response) {
-          setLoadingResponse(false)
-          setResponse(response)
-        }
-      } catch (error) {
-        console.log("loding model")
-        console.error("Failed to generate response:", error.message)
+    if (typeof append === 'function') {
+      append({ role: 'user', content: localInput });
+    } else if (typeof sendMessage === 'function') {
+      sendMessage({
+        parts: [{ type: 'text', text: localInput }],
+      });
+    } else if (typeof handleSubmit === 'function') {
+      const fakeEvent = { preventDefault: () => { }, target: { value: localInput } };
+      if (typeof handleInputChange === 'function') {
+        handleInputChange({ target: { value: localInput } });
+        handleSubmit(fakeEvent);
+      } else {
+        console.error("No valid submit method found.");
       }
     } else {
-      console.log("gettteing rsponse ")
+      console.error("No chat functions available.");
     }
-    setInput("")
-  }
+    setLocalInput("");
+  };
 
-  async function handelSubmit() {
-    setLoadingResponse(true)
-    await main(input)
-  }
-  // useEffect(() => {
-  //   async function getchunkdata() {
-  //     for await (const chunk of stream) {
-  //       console.log("chunk", chunk)
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isOpen]);
 
-  //       // if (chunk.choices && chunk.choices.length > 0) {
-  //       //   const newContent = chunk.choices[0].delta.content
-  //       //   out += newContent
-  //       //   console.log("newContent", newContent)
-  //       // }
-  //     }
-  //   }
-  //   getchunkdata()
-  // })
-  // useEffect(() => {
-  //   async function getEmbeddingsAndStoreInSupabase(texts) {
-  //     const modelId = "intfloat/e5-base-v2" // Model for embedding
-  //     const hfToken = "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" // Hugging Face API token
-  //     const apiUrl = `https://api-inference.huggingface.co/pipeline/feature-extraction/${modelId}`
-
-  //     try {
-  //       const embeddingWithPair = await Promise.all(
-  //         texts.map(async (text) => {
-  //           const response = await fetch(apiUrl, {
-  //             method: "POST",
-  //             headers: {
-  //               Authorization: `Bearer ${hfToken}`,
-  //               "Content-Type": "application/json",
-  //             },
-  //             body: JSON.stringify({ inputs: [text] }),
-  //           })
-
-  //           if (!response.ok) {
-  //             throw new Error("Failed to fetch embeddings")
-  //           }
-
-  //           const data = await response.json()
-  //           return { content: text, embedding: data[0] } // Return content and embedding
-  //         })
-  //       )
-
-  //       // Store the embeddings in Supabase
-  //       const { data, error } = await supabase
-  //         .from("properties_ai")
-  //         .insert(embeddingWithPair)
-
-  //       console.log("embeddingWithPair", embeddingWithPair)
-
-  //       if (error) {
-  //         console.error("Error storing embeddings in Supabase:", error)
-  //       } else {
-  //         console.log("Embeddings successfully stored in Supabase:", data)
-  //       }
-
-  //       return embeddingWithPair // Return embeddings with content for further use if needed
-  //     } catch (error) {
-  //       console.error("Error fetching embeddings:", error)
-  //       return []
-  //     }
-  //   }
-
-  //   // Example usage
-  //   const content = formatedData
-
-  //   getEmbeddingsAndStoreInSupabase(content)
-  //     .then((data) => console.log("Embeddings:", data))
-  //     .catch((error) => console.error("Error:", error))
-  // }, [])
-
-  return isOpen ? (
-    <div className=" fixed bottom-4 right-4 bg-white text-gray-900 rounded-lg shadow-xl flex flex-col p-4 space-y-4 h-[80%] w-[90%]  md:w-[30%] lg:w-[25%] xl:w-[20%] sm:w-10 ">
-      <button className="absolute top-0 right-0 mt-2 mr-2 text-gray-500 hover:text-gray-700">
-        <div
-          onClick={() => {
-            setIsOpen(false)
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9, transformOrigin: 'bottom right' }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="mb-4 w-[350px] sm:w-[400px] h-[500px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
           >
-            <path
-              fillRule="evenodd"
-              d="M6.293 4.293a1 1 0 011.414 0L10 6.586l2.293-2.293a1 1 0 111.414 1.414L11.414 8l2.293 2.293a1 1 0 01-1.414 1.414L10 9.414l-2.293 2.293a1 1 0 11-1.414-1.414L8.586 8 6.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <p>close</p>
-        </div>
-      </button>
+            {/* Header */}
+            <div className="p-4 bg-blue-600 text-white flex justify-between items-center shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <FiHome className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">SwiftStay Assistant</h3>
+                  <p className="text-[10px] text-blue-100 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-200 animate-pulse"></span>
+                    Ask anything about properties
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <FiChevronDown className="text-xl" />
+              </button>
+            </div>
 
-      {!loadingResponse ? (
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">
-            Search with AI
-          </h2>
-          {loading ? "...loading" : "Ai is ready to answer your questions"}
-          <p className="text-gray-600 py-5 pz-5 ">{resposne}</p>
-        </div>
-      ) : (
-        "...geting response please wait"
-      )}
+            {/* Chat Body */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide bg-slate-50">
+              {messages.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
+                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                    <FiMessageCircle className="text-3xl text-blue-500" />
+                  </div>
+                  <p className="text-slate-500 text-sm">
+                    Hi! I can help you find your dream home. Try asking for specific locations or budgets!
+                  </p>
+                </div>
+              )}
 
-      <div className="flex flex-col  align-bottom flex-1  gap-4 justify-end ">
-        <div className="relative w-full">
-          <input
-            type="text"
-            value={input}
-            onChange={handelChange}
-            placeholder="Ask me anything..."
-            className="w-full py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-          />
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex gap-2 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px]
+                      ${m.role === 'user' ? 'bg-slate-800 text-white' : 'bg-blue-600 text-white'}`}>
+                      {m.role === 'user' ? <FiUser /> : <FiHome />}
+                    </div>
+                    <div className={`px-4 py-2 rounded-2xl text-xs leading-relaxed
+                      ${m.role === 'user'
+                        ? 'bg-blue-600 text-white rounded-tr-none'
+                        : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none shadow-sm'}`}>
+                      {m.content}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Area */}
+            <form
+              onSubmit={handleManualSubmit}
+              className="p-4 bg-white border-t border-slate-100 flex gap-2 items-center"
             >
-              <path
-                fillRule="evenodd"
-                d="M13.295 11.705a7 7 0 1 1 1.414-1.414 8.95 8.95 0 0 1 1.334 2.126l4.557 4.557-1.5 1.5-4.557-4.557a8.95 8.95 0 0 1-2.126 1.334zM15 7a6 6 0 1 0-12 0 6 6 0 0 0 12 0z"
-                clipRule="evenodd"
+              <input
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-4 py-2 text-xs outline-none focus:border-blue-400 transition-all"
+                placeholder="What can I find for you?"
+                value={localInput}
+                onChange={(e) => setLocalInput(e.target.value)}
               />
-            </svg>
-          </div>
-        </div>
+              <button
+                type="submit"
+                disabled={!localInput?.trim() || status === 'streaming'}
+                className={`p-2.5 rounded-full transition-all flex items-center justify-center
+                  ${!localInput?.trim() || status === 'streaming'
+                    ? 'bg-slate-100 text-slate-300'
+                    : 'bg-blue-600 text-white shadow-lg shadow-blue-200 hover:scale-105 active:scale-95'}`}
+              >
+                <FiSend className="text-sm" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <button
-          className="w-full py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none transition duration-300"
-          onClick={handelSubmit}
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div
-      onClick={() => {
-        setIsOpen(true)
-      }}
-      className="fixed bottom-4 right-4 sm:w-40 bg-white text-gray-900 rounded-lg shadow-2xl flex gap-2 justify-center align-middle items-center p-4 w-20"
-    >
-      <h1 className=" chatbot-container-text">open chat</h1>
-      <svg
-        width="30px"
-        height="30px"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+      <motion.button
+        layout
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-14 h-14 bg-blue-600 rounded-full shadow-xl flex items-center justify-center text-white hover:bg-blue-700 hover:scale-110 active:scale-95 transition-all"
       >
-        <path
-          d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z"
-          stroke="#000000"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12"
-          stroke="#000000"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M9 8.01953V8"
-          stroke="#000000"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M15 8.01953V8"
-          stroke="#000000"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        {isOpen ? <FiX className="text-2xl" /> : <FiMessageCircle className="text-2xl" />}
+      </motion.button>
     </div>
-  )
+  );
 }

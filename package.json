@@ -10,6 +10,8 @@
     "devtest": "cross-env NODE_OPTIONS='--inspect' next dev"
   },
   "dependencies": {
+    "@ai-sdk/langchain": "^2.0.28",
+    "@ai-sdk/react": "^3.0.23",
     "@ant-design/icons": "",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
@@ -19,7 +21,8 @@
     "@huggingface/inference": "^2.8.1",
     "@huggingface/transformers": "^3.1.2",
     "@langchain/community": "^0.3.18",
-    "@langchain/core": "^0.3.23",
+    "@langchain/core": "^0.3.80",
+    "@langchain/langgraph": "^0.2.74",
     "@langchain/mistralai": "^0.2.0",
     "@langchain/textsplitters": "^0.1.0",
     "@mui/icons-material": "^6.1.6",
@@ -28,6 +31,7 @@
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.5",
     "@xenova/transformers": "^2.4.2",
+    "ai": "^6.0.23",
     "antd": "",
     "bootstrap": "^5.3.3",
     "clsx": "^2.1.1",
